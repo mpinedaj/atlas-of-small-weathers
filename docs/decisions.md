@@ -102,3 +102,11 @@ pull requests.
 **2026-11-02.** Every pull request runs lint, typecheck, unit tests, production build and a
 Chromium end-to-end suite. A red pipeline is not merged. `main` is protected when the token allows
 it; otherwise the same rule is documented in `CONTRIBUTING.md` and followed manually.
+
+## D13 — Elevation joins the seasonal baseline
+
+**2026-11-02.** Latitude alone would read Bogotá as a hot equatorial city and paint its 14 °C
+afternoon as a cold snap. The forecast response already includes elevation, so the baseline
+subtracts 4.5 °C per kilometre before adding the seasonal sinusoid. This keeps D4's promise of no
+second request while making mountain cities feel like themselves. The lapse rate is a boundary-layer
+approximation, not a climate model; the function and its limits live in `src/data/baseline.ts`.

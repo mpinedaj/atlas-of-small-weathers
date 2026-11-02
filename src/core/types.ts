@@ -19,6 +19,8 @@ export interface WeatherSnapshot {
   readonly admin1?: string;
   readonly latitude: number;
   readonly longitude: number;
+  /** Elevation in metres, when the provider reports it. Used for the baseline. */
+  readonly elevationM?: number;
   /** IANA timezone from Open-Meteo, e.g. "America/Bogota". */
   readonly timezone: string;
   /** ISO timestamp of the observation, in the place's own timezone. */

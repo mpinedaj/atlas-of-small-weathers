@@ -1,5 +1,8 @@
 import './styles/index.css';
 
+import { DEFAULT_PLACE, loadWeather } from './data';
+import type { WeatherResult } from './data';
+
 const mark = `
   <svg class="boot__mark" viewBox="0 0 96 96" aria-hidden="true" focusable="false">
     <path fill="currentColor" opacity=".94"
@@ -9,6 +12,15 @@ const mark = `
   </svg>
 `;
 
+function statusLine(result: WeatherResult): string {
+  if (result.source === 'offline' && result.note) return result.note;
+
+  const temperature = Math.round(result.snapshot.temperatureC);
+  const observed = result.source === 'stale' ? ' · earlier reading' : '';
+  return `${result.snapshot.description}, ${temperature}° in ${result.snapshot.city}${observed} · seed 1844`;
+}
+
+const params = new URLSearchParams(window.location.search);
 const app = document.querySelector<HTMLDivElement>('#app');
 
 if (app) {
@@ -17,7 +29,16 @@ if (app) {
       ${mark}
       <h1 class="boot__title">Atlas of Small Weathers</h1>
       <p class="boot__line">A quiet engine for painting the sky above one place.</p>
-      <p class="boot__detail">Preparing the first wash &middot; seed 1844</p>
+      <p class="boot__detail" aria-live="polite">Preparing the first wash · seed 1844</p>
     </main>
   `;
+
+  const detail = app.querySelector<HTMLElement>('.boot__detail');
+  void loadWeather(DEFAULT_PLACE, { offline: params.has('offline') })
+    .then((result) => {
+      if (detail) detail.textContent = statusLine(result);
+    })
+    .catch(() => {
+      if (detail) detail.textContent = 'The weather is resting. The paper is ready.';
+    });
 }

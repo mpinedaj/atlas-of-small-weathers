@@ -6,6 +6,15 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Typed Open-Meteo client for current weather and geocoding, with pure parsers and a calm offline
+  sample.
+- Versioned memory and localStorage cache with per-endpoint lifetimes and stale fallbacks.
+- Seasonal temperature baseline using latitude, elevation and day of year.
+- WMO weather-code normalisation and the default weather-to-gesture mapping.
+- Architecture guide and a visible offline state on the opening screen.
+
 ## [0.0.0] - 2026-11-02
 
 ### Added
