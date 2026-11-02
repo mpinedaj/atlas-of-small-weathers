@@ -39,7 +39,7 @@ URL restores the exact view.
 **2026-11-02.** "Warm" is meaningless without a norm: 18 °C is a warm winter in Bogotá and a cold
 summer in Oslo. Rather than a second network request for climatology, the baseline is a documented
 sinusoid of latitude and day-of-year, with a small continental offset. The painting reacts to the
-*anomaly*, not the raw number.
+_anomaly_, not the raw number.
 
 **Cost:** it is an approximation. It is deterministic, free, offline-safe and good enough for
 pigment. The function lives in `src/data/baseline.ts` with its limits stated.
@@ -55,7 +55,7 @@ the interface says so in plain language.
 
 ## D6 — Seed 1844 is the default
 
-**2026-11-02.** The default seed is a quiet nod to J. M. W. Turner's *Rain, Steam and Speed*
+**2026-11-02.** The default seed is a quiet nod to J. M. W. Turner's _Rain, Steam and Speed_
 (1844). It gives every first visit a composed, warm opening instead of a random one. Seeds remain
 fully editable and shareable.
 

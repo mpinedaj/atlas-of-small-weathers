@@ -27,11 +27,7 @@
     rgb(12 11 9 / 46%) 36%,
     rgb(12 11 9 / 0%) 100%
   );
-  --scrim-top: linear-gradient(
-    to bottom,
-    rgb(12 11 9 / 58%) 0%,
-    rgb(12 11 9 / 0%) 100%
-  );
+  --scrim-top: linear-gradient(to bottom, rgb(12 11 9 / 58%) 0%, rgb(12 11 9 / 0%) 100%);
 
   /* Type */
   --font-display: 'Fraunces Variable', 'Fraunces', Georgia, 'Times New Roman', serif;
@@ -81,7 +77,12 @@
 
 @media (prefers-contrast: more) {
   :root {
-    --scrim-bottom: linear-gradient(to top, rgb(0 0 0 / 92%) 0%, rgb(0 0 0 / 70%) 55%, rgb(0 0 0 / 0%) 100%);
+    --scrim-bottom: linear-gradient(
+      to top,
+      rgb(0 0 0 / 92%) 0%,
+      rgb(0 0 0 / 70%) 55%,
+      rgb(0 0 0 / 0%) 100%
+    );
     --scrim-top: linear-gradient(to bottom, rgb(0 0 0 / 82%) 0%, rgb(0 0 0 / 0%) 100%);
     --ink-muted: #55493b;
   }
@@ -89,7 +90,12 @@
 
 @media (prefers-reduced-transparency: reduce) {
   :root {
-    --scrim-bottom: linear-gradient(to top, rgb(12 11 9 / 94%) 0%, rgb(12 11 9 / 88%) 32%, rgb(12 11 9 / 0%) 100%);
+    --scrim-bottom: linear-gradient(
+      to top,
+      rgb(12 11 9 / 94%) 0%,
+      rgb(12 11 9 / 88%) 32%,
+      rgb(12 11 9 / 0%) 100%
+    );
     --scrim-top: linear-gradient(to bottom, rgb(12 11 9 / 90%) 0%, rgb(12 11 9 / 0%) 100%);
   }
 }

@@ -1,0 +1,13 @@
+# Normalise line endings in the repository so scripts and shaders behave the
+# same on Windows, macOS and Linux.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.webp binary
+*.avif binary
+*.woff binary
+*.woff2 binary
+
+# Husky hooks are executed by a POSIX shell; CRLF breaks them.
+.husky/* text eol=lf

@@ -116,7 +116,9 @@ canvas {
   font-family: var(--font-display);
   font-size: var(--text-place);
   font-weight: 400;
-  font-variation-settings: 'opsz' 72, 'SOFT' 30;
+  font-variation-settings:
+    'opsz' 72,
+    'SOFT' 30;
   letter-spacing: -0.025em;
   line-height: 0.98;
   max-width: 18ch;
