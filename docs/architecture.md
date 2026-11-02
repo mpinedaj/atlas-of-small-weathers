@@ -78,6 +78,43 @@ core discovers schools from `schools/*` with `import.meta.glob`, validates their
 metadata and refuses to boot a malformed one rather than painting something it
 cannot explain.
 
+### One frame
+
+```
+particles ──► flow shader ──► particle splat ──► projection ──► dye advection
+                                                                     │
+canvas ◄── post ◄── field ◄── brush splat ◄──────────────────────────┘
+```
+
+- **Velocity** is advected first. The school's `flow` shader then adds wind,
+  curl, humidity and rain forces, and particles add local turbulence.
+- **Projection** solves pressure with Jacobi iterations and subtracts the
+  gradient, so the field stays divergence-free and the paint curls instead of
+  exploding.
+- **Dye** is advected along the field, then `brush` stamps add pigment. The dye
+  buffer stores premultiplied colour and coverage.
+- **Field** is the school's atmosphere. **Post** combines field and dye with
+  paper fibre, grain, bloom and vignette.
+- Particles are advanced entirely on the GPU with transform feedback. Their
+  state never crosses into JavaScript.
+- Shader slot bodies are statements inside `main()`. The core supplies
+  `#version`, precision, uniforms, noise helpers and the signature.
+
+### Determinism and tempo
+
+Live mode advances the simulation by real elapsed time. `prefers-reduced-motion`
+multiplies that by 0.34: the painting keeps breathing, slowly. `?still=1&warmup=N`
+advances a fixed 1/60 s clock for N frames and draws once, which is what tests and
+screenshots use. The same weather, seed and school produce the same frame.
+
+### Falling back
+
+WebGL2 with float colour buffers is the happy path. A missing context, a missing
+extension or a shader that cannot compile at all hands the resolved scene to
+`src/gl/fallback.ts`, a 2D canvas painter with the same palette, gestures and
+seed. Individual school slots that fail to compile degrade to the house shader
+instead of taking the whole page down.
+
 ## Interface (`src/ui`)
 
 Plain DOM, no framework. The URL is the source of truth (`city`, `lat`, `lon`,

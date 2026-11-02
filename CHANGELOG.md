@@ -14,6 +14,9 @@ All notable changes to this project are documented here. The format follows
 - Seasonal temperature baseline using latitude, elevation and day of year.
 - WMO weather-code normalisation and the default weather-to-gesture mapping.
 - Architecture guide and a visible offline state on the opening screen.
+- Hand-written WebGL2 painting engine: GPU brush particles, a ping-pong fluid field, four shader
+  slots for schools, adaptive quality and deterministic still mode.
+- A 2D canvas painting and a poetic note when WebGL2 float targets are unavailable.
 
 ## [0.0.0] - 2026-11-02
 
