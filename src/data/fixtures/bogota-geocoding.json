@@ -1,0 +1,40 @@
+{
+  "results": [
+    {
+      "id": 3688689,
+      "name": "Bogotá",
+      "latitude": 4.6097,
+      "longitude": -74.0817,
+      "elevation": 2586.0,
+      "feature_code": "PPLC",
+      "country_code": "CO",
+      "admin1_id": 3688688,
+      "timezone": "America/Bogota",
+      "population": 7674366,
+      "country_id": 3686110,
+      "country": "Colombia",
+      "admin1": "Bogotá D.C."
+    },
+    {
+      "id": 5096798,
+      "name": "Bogota",
+      "latitude": 40.8762,
+      "longitude": -74.0293,
+      "elevation": 13.0,
+      "feature_code": "PPL",
+      "country_code": "US",
+      "admin1_id": 5101760,
+      "timezone": "America/New_York",
+      "population": 8187,
+      "country_id": 6252001,
+      "country": "United States",
+      "admin1": "New Jersey",
+      "admin2": "Bergen County"
+    },
+    {
+      "id": 0,
+      "name": "Missing coordinates",
+      "country": "Nowhere"
+    }
+  ]
+}

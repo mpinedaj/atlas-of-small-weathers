@@ -1,0 +1,37 @@
+{
+  "latitude": 4.625,
+  "longitude": -74.125,
+  "generationtime_ms": 0.052,
+  "utc_offset_seconds": -18000,
+  "timezone": "America/Bogota",
+  "timezone_abbreviation": "GMT-5",
+  "elevation": 2557.0,
+  "current_units": {
+    "time": "iso8601",
+    "interval": "seconds",
+    "temperature_2m": "°C",
+    "relative_humidity_2m": "%",
+    "apparent_temperature": "°C",
+    "is_day": "",
+    "precipitation": "mm",
+    "weather_code": "wmo code",
+    "cloud_cover": "%",
+    "pressure_msl": "hPa",
+    "wind_speed_10m": "km/h",
+    "wind_direction_10m": "°"
+  },
+  "current": {
+    "time": "2026-11-02T12:45",
+    "interval": 900,
+    "temperature_2m": 14.2,
+    "relative_humidity_2m": 82,
+    "apparent_temperature": 13.6,
+    "is_day": 1,
+    "precipitation": 0.4,
+    "weather_code": 61,
+    "cloud_cover": 88,
+    "pressure_msl": 1012.4,
+    "wind_speed_10m": 9.7,
+    "wind_direction_10m": 134
+  }
+}

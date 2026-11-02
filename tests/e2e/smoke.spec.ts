@@ -8,12 +8,13 @@ test.describe('boot', () => {
     });
     page.on('pageerror', (error) => problems.push(`page: ${error.message}`));
 
-    await page.goto('/');
+    await page.goto('/?offline=1');
 
     await expect(page).toHaveTitle(/Atlas of Small Weathers/);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Atlas of Small Weathers');
     await expect(page.getByRole('main')).toBeVisible();
     await expect(page.getByText(/painting the sky above one place/i)).toBeVisible();
+    await expect(page.getByText(/Offline sample/i)).toBeVisible();
 
     expect(problems).toEqual([]);
   });
