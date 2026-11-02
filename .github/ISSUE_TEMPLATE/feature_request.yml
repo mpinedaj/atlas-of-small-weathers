@@ -1,0 +1,42 @@
+name: Feature request
+description: Propose a school, a weather mapping, or a change to the experience.
+title: 'feat: '
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is missing?
+      description: Describe the experience or capability you would like, and why it matters.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: A possible shape
+      description: How might it look, feel, or work? Sketches and references are welcome.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - New painterly school
+        - Weather data or mapping
+        - Rendering and performance
+        - Interface and accessibility
+        - Documentation and tooling
+        - Other
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I would like to work on this myself.
+          required: false

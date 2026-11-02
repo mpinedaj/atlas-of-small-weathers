@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Read the contributing guide
+    url: https://github.com/mpinedaj/atlas-of-small-weathers/blob/main/CONTRIBUTING.md
+    about: Setup, branch names, commit style, and how to add a school.
+  - name: Ask a question
+    url: https://github.com/mpinedaj/atlas-of-small-weathers/discussions
+    about: For open-ended questions and early ideas.
