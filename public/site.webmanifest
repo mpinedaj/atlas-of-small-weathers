@@ -1,0 +1,17 @@
+{
+  "name": "Atlas of Small Weathers",
+  "short_name": "Small Weathers",
+  "description": "Live weather, painted slowly.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#efe7d9",
+  "theme_color": "#efe7d9",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

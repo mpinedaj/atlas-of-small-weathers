@@ -1,0 +1,181 @@
+/* A small, deliberate reset. No utility framework, no theme. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--text-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+#app {
+  height: 100dvh;
+  min-height: 100svh;
+}
+
+h1,
+h2,
+h3,
+p,
+figure,
+blockquote {
+  margin: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+a {
+  color: inherit;
+}
+
+img,
+svg,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bone);
+}
+
+:focus-visible {
+  outline: 2px solid var(--bone);
+  outline-offset: 3px;
+  border-radius: 1px;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Boot screen, also the no-script and WebGL-failure stage. */
+.boot {
+  position: relative;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  height: 100%;
+  padding: var(--gutter);
+  text-align: center;
+  background: var(--paper);
+}
+
+.boot__mark {
+  width: 76px;
+  height: 76px;
+  margin-bottom: var(--space-5);
+  color: var(--accent);
+  animation: mark-arrive var(--dur-veil) var(--ease-out) both;
+}
+
+.boot__title {
+  font-family: var(--font-display);
+  font-size: var(--text-place);
+  font-weight: 400;
+  font-variation-settings: 'opsz' 72, 'SOFT' 30;
+  letter-spacing: -0.025em;
+  line-height: 0.98;
+  max-width: 18ch;
+  text-wrap: balance;
+  animation: text-arrive var(--dur-veil) var(--ease-out) 90ms both;
+}
+
+.boot__line {
+  margin-top: var(--space-4);
+  max-width: 30ch;
+  color: var(--ink-soft);
+  font-size: var(--text-body);
+  text-wrap: pretty;
+  animation: text-arrive var(--dur-veil) var(--ease-out) 180ms both;
+}
+
+.boot__detail {
+  margin-top: var(--space-2);
+  color: var(--ink-muted);
+  font-size: var(--text-caption);
+  animation: text-arrive var(--dur-veil) var(--ease-out) 240ms both;
+}
+
+@keyframes text-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mark-arrive {
+  from {
+    opacity: 0;
+    transform: scale(0.94) rotate(-3deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(-3deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boot__mark,
+  .boot__title,
+  .boot__line,
+  .boot__detail {
+    animation: fade-in var(--dur-calm) var(--ease-out) both;
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
