@@ -1,0 +1,38 @@
+{
+  "name": "atlas-of-small-weathers",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Turn live weather into slow, abstract paintings. A generative art atlas with pluggable painterly schools.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mpinedaj/atlas-of-small-weathers.git"
+  },
+  "homepage": "https://github.com/mpinedaj/atlas-of-small-weathers",
+  "keywords": [
+    "generative-art",
+    "webgl2",
+    "weather",
+    "glsl",
+    "open-source",
+    "painting"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "dependencies": {
+    "@fontsource-variable/fraunces": "^5.3.0",
+    "@fontsource-variable/instrument-sans": "^5.3.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vite": "^8.3.5"
+  }
+}

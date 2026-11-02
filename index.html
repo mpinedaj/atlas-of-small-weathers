@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#efe7d9" />
+
+    <title>Atlas of Small Weathers — your sky, painted</title>
+    <meta
+      name="description"
+      content="A generative art atlas that turns live weather into slow, abstract paintings. One city, one seed, one small weather."
+    />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Atlas of Small Weathers" />
+    <meta
+      property="og:description"
+      content="Live weather, painted slowly. Open data, WebGL2, and painterly schools you can extend."
+    />
+    <meta name="twitter:card" content="summary" />
+
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="manifest" href="./site.webmanifest" />
+
+    <script type="module" src="/src/main.ts"></script>
+  </head>
+  <body>
+    <div id="app">
+      <main class="boot" aria-busy="true">
+        <h1 class="boot__title">Atlas of Small Weathers</h1>
+        <p class="boot__line">A quiet engine for painting the sky above one place.</p>
+      </main>
+    </div>
+    <noscript>
+      <p class="visually-hidden">
+        This painting needs JavaScript and WebGL2. The weather and a textual description are still
+        available from Open-Meteo.
+      </p>
+    </noscript>
+  </body>
+</html>
