@@ -110,3 +110,22 @@ afternoon as a cold snap. The forecast response already includes elevation, so t
 subtracts 4.5 °C per kilometre before adding the seasonal sinusoid. This keeps D4's promise of no
 second request while making mountain cities feel like themselves. The lapse rate is a boundary-layer
 approximation, not a climate model; the function and its limits live in `src/data/baseline.ts`.
+
+## D14 — One fixed pipeline, four school slots
+
+**2026-11-02.** The renderer is a fixed sequence rather than a scene graph: advect velocity, let the
+school's flow shader add weather force, splat particle turbulence, project to divergence-free,
+advect dye, splat brush pigment, draw the field, composite paper and grain. Schools can change how
+each stage looks, but not the order; that order is what makes the motion read as fluid rather than
+as particles.
+
+Three consequences are deliberate. Brush particles live in GPU buffers and advance through
+transform feedback, so the CPU never touches thousands of positions per frame. A school shader body
+is the inside of `main()`, not a complete shader, which keeps the uniform contract identical across
+schools. And still mode (`?still=1&warmup=N`) runs the same pipeline at a fixed 1/60 s for N frames,
+then draws once with `preserveDrawingBuffer`; screenshots and visual tests therefore share the same
+deterministic clock as each other, while live mode follows real time (slowed, never stopped, under
+`prefers-reduced-motion`).
+
+The pipeline needs WebGL2 plus `EXT_color_buffer_float`. When either is missing, the app does not
+show an error card: it hands the same scene to a 2D canvas painter (D10).

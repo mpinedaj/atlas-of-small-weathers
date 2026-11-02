@@ -7,6 +7,12 @@
  * `Math.random()` in the render path entirely.
  */
 
+/**
+ * The seed of a first visit. 1844 is the year Turner first showed *Rain, Steam
+ * and Speed*, the painting this engine keeps in the corner of its eye.
+ */
+export const DEFAULT_SEED = 1844;
+
 /** Hash an arbitrary string into a 32-bit unsigned integer (xmur3). */
 export function hashString(value: string): number {
   let h = 1779033703 ^ value.length;
@@ -21,9 +27,9 @@ export function hashString(value: string): number {
 
 /** Normalise anything into a positive 32-bit seed. */
 export function normaliseSeed(seed: number): number {
-  if (!Number.isFinite(seed)) return 1844;
+  if (!Number.isFinite(seed)) return DEFAULT_SEED;
   const value = Math.floor(Math.abs(seed)) % 0xffffffff;
-  return value === 0 ? 1844 : value;
+  return value === 0 ? DEFAULT_SEED : value;
 }
 
 /** A small, fast, seedable PRNG with a stable sequence across platforms. */
