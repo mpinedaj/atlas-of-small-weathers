@@ -9,6 +9,11 @@ import { AtlasRenderer } from './gl/renderer';
 import { createHouseScene, createScene } from './gl/scene';
 import type { PaintingScene } from './gl/scene';
 import { defaultSchool, findSchool, getSchools } from './schools/registry';
+import type { SchoolPlugin } from './schools/registry';
+import { crossfadeThroughPaper } from './ui/paper';
+import { createSchoolSelector } from './ui/schools';
+import type { SchoolSelector } from './ui/schools';
+import { replaceSearchParam } from './ui/url';
 
 /**
  * The opening screen, and the hand-off between weather and painting.
@@ -83,6 +88,7 @@ function stageMarkup(
       <canvas class="atlas__canvas" aria-hidden="true"></canvas>
       <div class="atlas__scrim atlas__scrim--top" aria-hidden="true"></div>
       <div class="atlas__scrim atlas__scrim--bottom" aria-hidden="true"></div>
+      <div class="atlas__veil" aria-hidden="true"></div>
 
       <header class="atlas__header">
         <div class="atlas__identity">
@@ -90,7 +96,7 @@ function stageMarkup(
           <p class="atlas__tagline">A quiet engine for painting the sky above one place.</p>
         </div>
         <div class="atlas__meta">
-          <p class="atlas__school">${schoolName}</p>
+          <div class="atlas__schools-slot"></div>
           <p class="atlas__seed"><span>seed</span> ${seed}</p>
         </div>
       </header>
@@ -182,7 +188,7 @@ if (app) {
     .then((result) => {
       if (detail) detail.textContent = statusLine(result, seed);
 
-      const scene = activeSchool
+      let currentScene = activeSchool
         ? createScene(result.snapshot, seed, activeSchool)
         : createHouseScene(result.snapshot, seed);
       app.innerHTML = stageMarkup(
@@ -190,12 +196,31 @@ if (app) {
         seed,
         result.note ?? null,
         result.source,
-        scene.schoolName,
+        currentScene.schoolName,
       );
       const stage = app.querySelector<HTMLElement>('.atlas');
       const initialCanvas = app.querySelector<HTMLCanvasElement>('.atlas__canvas');
       if (!stage || !initialCanvas) return;
+
       let canvas: HTMLCanvasElement = initialCanvas;
+      let renderer: AtlasRenderer | null = null;
+      let painter: CanvasPainter | null = null;
+      let selector: SchoolSelector | null = null;
+      let switching = false;
+
+      const veil = stage.querySelector<HTMLElement>('.atlas__veil');
+
+      const refreshDescription = (): void => {
+        const description = document.getElementById('atlas-description');
+        if (description) {
+          description.textContent = describe(
+            result.snapshot,
+            seed,
+            result.source,
+            currentScene.schoolName,
+          );
+        }
+      };
 
       const painterOptions = {
         still,
@@ -203,13 +228,15 @@ if (app) {
         reducedMotion: reducedMotion.matches,
         onReady: () => {
           stage.dataset.ready = 'true';
-          setDebugState(stage, scene, result.snapshot, 'fallback');
+          setDebugState(stage, currentScene, result.snapshot, 'fallback');
         },
       };
 
       const startFallback = (reason: string): void => {
         // A canvas that has held a WebGL context cannot become a 2D canvas, so
         // the fallback gets a fresh element. The old one is removed with it.
+        renderer = null;
+        painter?.dispose();
         const replacement = canvas.cloneNode(false) as HTMLCanvasElement;
         replacement.removeAttribute('data-atlas-mode');
         replacement.removeAttribute('data-atlas-ready');
@@ -217,30 +244,74 @@ if (app) {
         canvas = replacement;
         stage.dataset.mode = 'fallback';
         stage.dataset.reason = reason;
-        const painter = new CanvasPainter(replacement, scene, painterOptions);
+        painter = new CanvasPainter(replacement, currentScene, painterOptions);
         painter.start();
       };
 
+      const applySchool = async (school: SchoolPlugin): Promise<void> => {
+        if (switching || school.meta.id === currentScene.schoolId) return;
+
+        const nextScene = createScene(result.snapshot, seed, school);
+        switching = true;
+        selector?.setBusy(true);
+
+        const swap = (): void => {
+          currentScene = nextScene;
+          if (renderer) renderer.setScene(nextScene);
+          else startFallback('school change');
+          selector?.setActive(school.meta.id);
+          refreshDescription();
+          replaceSearchParam('school', school.meta.id);
+          if (window.__atlas) window.__atlas = { ...window.__atlas, school: school.meta.id };
+        };
+
+        try {
+          if (veil) await crossfadeThroughPaper(veil, swap, reducedMotion.matches);
+          else swap();
+        } finally {
+          switching = false;
+          selector?.setBusy(false);
+        }
+      };
+
+      const schoolSlot = stage.querySelector<HTMLElement>('.atlas__schools-slot');
+      if (schoolSlot) {
+        if (discovery.schools.length > 0) {
+          selector = createSchoolSelector({
+            schools: discovery.schools,
+            activeId: currentScene.schoolId,
+            onChange: (school) => {
+              void applySchool(school);
+            },
+          });
+          schoolSlot.append(selector.element);
+        } else {
+          schoolSlot.innerHTML = `<p class="atlas__school atlas__school--static">${currentScene.schoolName}</p>`;
+        }
+      }
+
       try {
-        const renderer = new AtlasRenderer(canvas, scene, {
+        const created = new AtlasRenderer(canvas, currentScene, {
           still,
           warmupFrames,
           reducedMotion: reducedMotion.matches,
           onReady: (stats) => {
             stage.dataset.ready = 'true';
-            setDebugState(stage, scene, result.snapshot, 'webgl', stats);
+            setDebugState(stage, currentScene, result.snapshot, 'webgl', stats);
           },
           onStats: (stats) => {
             stage.dataset.fps = String(stats.fps);
             if (window.__atlas) window.__atlas = { ...window.__atlas, stats };
           },
           onContextLost: (reason) => {
-            renderer.dispose();
+            created.dispose();
+            if (renderer === created) renderer = null;
             startFallback(reason);
           },
         });
+        renderer = created;
         stage.dataset.mode = 'webgl';
-        renderer.start();
+        created.start();
       } catch (error) {
         startFallback(error instanceof Error ? error.message : String(error));
       }

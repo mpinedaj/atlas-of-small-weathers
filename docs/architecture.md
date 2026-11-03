@@ -78,6 +78,14 @@ core discovers schools from `schools/*` with `import.meta.glob`, validates their
 metadata and leaves out a malformed one rather than painting something it cannot
 explain. The folder contract is documented in [`docs/schools.md`](schools.md).
 
+Switching schools rebuilds the shader programs and the particle field against the
+new palette and gestures, clears the pigment and restarts the deterministic
+warm-up when the page is in still mode. The canvas element is never replaced, so
+the context, the adaptive quality tier and the accessibility wiring survive the
+change. The interface fades through paper while this happens; the new hand is
+installed while the stage is blank, which hides the one frame where old and new
+would otherwise mix.
+
 ### One frame
 
 ```
@@ -119,8 +127,11 @@ instead of taking the whole page down.
 
 Plain DOM, no framework. The URL is the source of truth (`city`, `lat`, `lon`,
 `school`, `seed`, `mode`), and every control writes back to it with
-`history.replaceState`. The canvas carries a textual description for screen
-readers. Debug controls (Tweakpane) are hidden behind a query parameter and are
+`history.replaceState`. The school selector is a small button group with
+`aria-pressed`; a change is crossfaded through a paper veil rather than shown as
+a loading state, and the group stays focusable while it is busy. The canvas
+carries a textual description for screen readers, rewritten when the school
+changes. Debug controls (Tweakpane) are hidden behind a query parameter and are
 never part of the published experience.
 
 ## Testing

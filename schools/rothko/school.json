@@ -1,0 +1,9 @@
+{
+  "id": "rothko",
+  "name": "Rothko",
+  "author": "Atlas of Small Weathers",
+  "license": "MIT",
+  "description": "Weather as colour, not weather: stacked fields that breathe at the edge of focus, after Mark Rothko.",
+  "references": ["Mark Rothko, No. 14 (1960)", "Mark Rothko, Rothko Chapel (1971)"],
+  "version": "0.1.0"
+}
