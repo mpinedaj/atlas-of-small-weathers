@@ -16,8 +16,26 @@ import {
 
 const discovery = getSchools();
 const turner = findSchool(discovery.schools, 'turner');
+const rothko = findSchool(discovery.schools, 'rothko');
+const hokusai = findSchool(discovery.schools, 'hokusai');
+const schools = [turner, rothko, hokusai];
 const conditions: readonly Condition[] = ['clear', 'cloudy', 'rain', 'storm', 'snow', 'fog'];
 const HEX = /^#[0-9a-f]{6}$/;
+
+const context = {
+  condition: 'clear' as const,
+  isDay: true,
+  warmth: 0,
+  humidity: 0.5,
+  cloud: 0.5,
+  pressure: 0.5,
+  rain: 0.25,
+  seed: 1844,
+};
+
+const red = (hex: string): number => parseInt(hex.slice(1, 3), 16);
+const meanRed = (washes: readonly string[]): number =>
+  washes.reduce((total, colour) => total + red(colour), 0) / washes.length;
 
 function issuesOf(run: () => unknown): readonly string[] {
   try {
@@ -40,14 +58,20 @@ const validMeta = {
 };
 
 describe('school discovery', () => {
-  it('finds the Turner school without a hand-written registry', () => {
+  it('finds all three schools without a hand-written registry', () => {
     expect(discovery.errors).toEqual([]);
-    expect(turner).toBeDefined();
-    expect(turner?.meta.id).toBe('turner');
-    expect(turner?.meta.name).toBe('Turner');
-    expect(turner?.directory).toBe('schools/turner');
-    expect(turner?.meta.references.length).toBeGreaterThanOrEqual(2);
-    expect(typeof turner?.palette).toBe('function');
+    expect(discovery.schools.map((school) => school.meta.name)).toEqual([
+      'Hokusai',
+      'Rothko',
+      'Turner',
+    ]);
+
+    for (const school of schools) {
+      expect(school).toBeDefined();
+      expect(school?.directory).toBe(`schools/${school?.meta.id}`);
+      expect(school?.meta.references.length).toBeGreaterThanOrEqual(2);
+      expect(typeof school?.palette).toBe('function');
+    }
   });
 
   it('opens with Turner when it exists, and degrades to the first school', () => {
@@ -58,6 +82,8 @@ describe('school discovery', () => {
 
   it('resolves a school from a URL value and ignores unknown ids', () => {
     expect(findSchool(discovery.schools, 'turner')).toBe(turner);
+    expect(findSchool(discovery.schools, 'rothko')).toBe(rothko);
+    expect(findSchool(discovery.schools, 'hokusai')).toBe(hokusai);
     expect(findSchool(discovery.schools, 'not-a-school')).toBeUndefined();
     expect(findSchool(discovery.schools, null)).toBeUndefined();
   });
@@ -135,97 +161,120 @@ describe('school metadata validation', () => {
   });
 });
 
-describe('Turner palette', () => {
-  it('returns a complete, valid palette for every weather condition', () => {
-    for (const condition of conditions) {
-      const palette = turner!.palette(
-        { ...offlineSnapshot, condition },
-        {
-          condition,
-          isDay: true,
-          warmth: 0,
-          humidity: 0.5,
-          cloud: 0.5,
-          pressure: 0.5,
-          rain: 0.25,
-          seed: 1844,
-        },
-      );
+describe('school palettes', () => {
+  it.each(schools.map((school) => [school!.meta.name, school!] as const))(
+    '%s returns a complete, valid palette for every weather condition',
+    (_name, school) => {
+      for (const condition of conditions) {
+        const palette = school.palette(
+          { ...offlineSnapshot, condition },
+          { ...context, condition },
+        );
 
-      expect(palette.washes).toHaveLength(6);
-      for (const colour of [
-        palette.ground,
-        palette.ink,
-        palette.accent,
-        palette.highlight,
-        palette.shadow,
-        ...palette.washes,
-      ]) {
-        expect(colour).toMatch(HEX);
+        expect(palette.washes).toHaveLength(6);
+        for (const colour of [
+          palette.ground,
+          palette.ink,
+          palette.accent,
+          palette.highlight,
+          palette.shadow,
+          ...palette.washes,
+        ]) {
+          expect(colour).toMatch(HEX);
+        }
       }
+    },
+  );
+
+  it('is deterministic for the same weather, context and seed', () => {
+    const reading = { ...offlineSnapshot, condition: 'rain' as const };
+
+    for (const school of schools) {
+      expect(school!.palette(reading, { ...context, condition: 'rain' })).toEqual(
+        school!.palette(reading, { ...context, condition: 'rain' }),
+      );
     }
   });
 
-  it('moves toward ochre when warmer than the season and slate when colder', () => {
-    const context = {
-      condition: 'clear' as const,
-      isDay: true,
-      humidity: 0.4,
-      cloud: 0.1,
-      pressure: 0.2,
-      rain: 0,
-      seed: 1844,
-    };
-    const warm = turner!.palette({ ...offlineSnapshot, warmth: 1 }, { ...context, warmth: 1 });
-    const cold = turner!.palette({ ...offlineSnapshot, warmth: -1 }, { ...context, warmth: -1 });
+  it('warms the washes and accent above the seasonal baseline, cools them below', () => {
+    for (const school of schools) {
+      const warm = school!.palette(
+        { ...offlineSnapshot, warmth: 1 },
+        { ...context, warmth: 1, cloud: 0.1, rain: 0, humidity: 0.4, pressure: 0.2 },
+      );
+      const cold = school!.palette(
+        { ...offlineSnapshot, warmth: -1 },
+        { ...context, warmth: -1, cloud: 0.1, rain: 0, humidity: 0.4, pressure: 0.2 },
+      );
 
-    const red = (hex: string): number => parseInt(hex.slice(1, 3), 16);
-    const meanRed = (washes: readonly string[]): number =>
-      washes.reduce((total, colour) => total + red(colour), 0) / washes.length;
+      expect(meanRed(warm.washes)).toBeGreaterThan(meanRed(cold.washes));
+      expect(red(warm.accent)).toBeGreaterThan(red(cold.accent));
+    }
+  });
 
-    expect(meanRed(warm.washes)).toBeGreaterThan(meanRed(cold.washes));
-    expect(red(warm.accent)).toBeGreaterThan(red(cold.accent));
+  it('keeps the three schools visibly distinct in the same weather', () => {
+    const reading = { ...offlineSnapshot, condition: 'clear' as const, isDay: true };
+    const palettes = schools.map((school) => school!.palette(reading, context));
+
+    expect(new Set(palettes.map((palette) => palette.ground)).size).toBe(3);
+    expect(new Set(palettes.map((palette) => palette.washes[3])).size).toBe(3);
   });
 });
 
-describe('Turner scene', () => {
-  const scene = createScene(offlineSnapshot, 1844, turner);
+describe('school scenes', () => {
+  it.each(schools.map((school) => [school!.meta.name, school!] as const))(
+    '%s uses its own identity, palette, mapping and every shader slot',
+    (_name, school) => {
+      const scene = createScene(offlineSnapshot, 1844, school);
 
-  it('uses the school identity, palette and mapping', () => {
-    expect(scene.schoolId).toBe('turner');
-    expect(scene.schoolName).toBe('Turner');
-    expect(scene.seed).toBe(1844);
-    expect(scene.palette.washes).toHaveLength(6);
+      expect(scene.schoolId).toBe(school.meta.id);
+      expect(scene.schoolName).toBe(school.meta.name);
+      expect(scene.seed).toBe(1844);
+      expect(scene.palette.washes).toHaveLength(6);
 
-    for (const value of Object.values(scene.gestures)) {
-      if (typeof value === 'number') expect(Number.isFinite(value)).toBe(true);
+      for (const value of Object.values(scene.gestures)) {
+        if (typeof value === 'number') expect(Number.isFinite(value)).toBe(true);
+      }
+
+      for (const slot of ['field', 'flow', 'brush', 'post'] as const) {
+        const body = scene.shaders[slot];
+        const source = buildFragment(slot, body);
+
+        expect(body).not.toBe(DEFAULT_SHADERS[slot]);
+        expect(body.trim().length).toBeGreaterThan(0);
+        expect(body).not.toContain('#version');
+        expect(body).not.toContain('void main');
+        expect(source.match(/void main\(\)/g)).toHaveLength(1);
+        expect(source).toContain('fragColor =');
+      }
+    },
+  );
+
+  it('keeps every brush shader premultiplied', () => {
+    for (const school of schools) {
+      const brush = createScene(offlineSnapshot, 1844, school).shaders.brush;
+
+      expect(brush).toMatch(/fragColor = vec4\([^;]*\* alpha, alpha\);/);
     }
   });
 
-  it('overlays the school shaders over the house shaders slot by slot', () => {
-    for (const slot of ['field', 'flow', 'brush', 'post'] as const) {
-      expect(scene.shaders[slot]).not.toBe(DEFAULT_SHADERS[slot]);
-      expect(scene.shaders[slot].trim().length).toBeGreaterThan(0);
-    }
-  });
-
-  it('keeps every Turner shader body inside the shared shader contract', () => {
-    for (const slot of ['field', 'flow', 'brush', 'post'] as const) {
-      const body = scene.shaders[slot];
-      const source = buildFragment(slot, body);
-
-      expect(body).not.toContain('#version');
-      expect(body).not.toContain('void main');
-      expect(source.match(/void main\(\)/g)).toHaveLength(1);
-      expect(source).toContain('fragColor =');
-    }
-  });
-
-  it('brushes longer in wind than the house mapping', () => {
+  it('lets Turner brush longer in wind than the house mapping', () => {
     const windy: WeatherSnapshot = { ...offlineSnapshot, windSpeedKmh: 42 };
 
     expect(createScene(windy, 1844, turner).gestures.strokeLength).toBeGreaterThan(
       createScene(windy, 1844).gestures.strokeLength,
     );
+  });
+
+  it('keeps Rothko calmer and Hokusai more emphatic than the house mapping', () => {
+    const windy: WeatherSnapshot = { ...offlineSnapshot, windSpeedKmh: 42 };
+    const house = createScene(windy, 1844).gestures;
+
+    expect(createScene(windy, 1844, rothko).gestures.strokeLength).toBeLessThan(house.strokeLength);
+    expect(createScene(windy, 1844, rothko).gestures.tension).toBeLessThan(house.tension);
+    expect(createScene(windy, 1844, hokusai).gestures.strokeLength).toBeGreaterThan(
+      house.strokeLength,
+    );
+    expect(createScene(windy, 1844, hokusai).gestures.tension).toBeGreaterThan(house.tension);
   });
 });

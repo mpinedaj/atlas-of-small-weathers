@@ -1,0 +1,12 @@
+{
+  "id": "hokusai",
+  "name": "Hokusai",
+  "author": "Atlas of Small Weathers",
+  "license": "MIT",
+  "description": "Weather cut into flat ink, wind lines and a curling sea, with the misregistration of a woodblock print.",
+  "references": [
+    "Katsushika Hokusai, Thirty-six Views of Mount Fuji (1831)",
+    "Katsushika Hokusai, The Great Wave off Kanagawa (1831)"
+  ],
+  "version": "0.1.0"
+}

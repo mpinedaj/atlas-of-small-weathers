@@ -6,6 +6,26 @@ core owns everything else: the fluid, the particles, the clock and the frame.
 
 Adding a school means adding a folder. It never means editing `src/`.
 
+## The three schools
+
+The first release ships three deliberately different readings of the same
+weather. They share the pipeline and the data, and almost nothing else.
+
+| School  | What weather becomes                                                                          | Where it lives                          |
+| ------- | --------------------------------------------------------------------------------------------- | --------------------------------------- |
+| Turner  | Luminous weather: a horizon, a rain veil, a heavy cloud mass and long scumbled strokes.       | [`schools/turner`](../schools/turner)   |
+| Rothko  | Colour before weather: three stacked fields that breathe at the edge of focus, barely moving. | [`schools/rothko`](../schools/rothko)   |
+| Hokusai | A woodblock print: flat ink blocks, a curling sea, wind lines and a small registration error. | [`schools/hokusai`](../schools/hokusai) |
+
+The selector in the header switches between them. It is a group of real buttons
+with `aria-pressed`, not a menu; arrow keys, Home and End move focus, and the
+scene changes behind a short fade through bare paper. The chosen school is
+written to `?school=` so the painting can be shared or reopened.
+
+Screenshots of all three, at 1440×900 and 390×844, live in
+[`docs/screenshots`](screenshots). They were captured from the recorded Bogotá
+sample with `?offline=1&still=1&warmup=360`.
+
 ## Folder contract
 
 ```

@@ -140,3 +140,17 @@ files are bodies inside `main()`, not complete programs, so every school shares 
 helper contract; if a single slot fails to compile, that slot degrades to the house shader and the
 renderer reports it. `?school=<id>` selects a school, and an unknown id falls back to Turner. The
 complete authoring contract lives in `docs/schools.md`.
+
+## D16 — A school change is a veil through paper, not a loading state
+
+**2026-11-02.** Changing hands is the most visible interaction in the atlas, and a spinner would
+turn a painting into an application. Instead the stage fades to bare paper, the new programs,
+palette and particles are installed while nothing is visible, and the paper lifts again. The
+selector's buttons stay in the document and keep keyboard focus during the change; the group is
+marked busy and ignores extra activation rather than disabling the button that was just pressed.
+The whole gesture is 900 ms (180 ms under `prefers-reduced-motion`), which is long enough to read as
+a deliberate cut and short enough not to feel like waiting.
+
+**Cost:** the renderer now has a `setScene` path that must rebuild every GPU resource and restart
+still-mode warm-up without ever replacing the canvas. The crossfade is a real transition, so the
+end-to-end suite waits for the new scene's frame counter rather than for a click to return.

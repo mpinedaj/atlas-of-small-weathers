@@ -21,6 +21,13 @@ All notable changes to this project are documented here. The format follows
   validation that reports a malformed folder instead of painting it.
 - The Turner school: a luminous horizon, a rain veil, a heavy upper cloud mass and long scumbled
   strokes, selectable with `?school=turner`.
+- The Rothko school: three stacked, feathered colour fields that drift almost to stillness, with
+  weather changing their temperature rather than their arrangement.
+- The Hokusai school: flat ink blocks, a curling sea, fine wind lines and a deliberate woodblock
+  misregistration.
+- An accessible school selector in the header, with arrow, Home and End key movement, a visible
+  pressed state and a paper-veil crossfade that preserves keyboard focus while the scene changes.
+- `?school=` persistence when the school changes, so a shared URL restores the same hand.
 - `docs/schools.md`, the complete authoring contract for palette, mapping and shader schools.
 
 ## [0.0.0] - 2026-11-02

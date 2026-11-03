@@ -88,11 +88,63 @@ test.describe('painting', () => {
     const stage = page.locator('.atlas');
     await expect(stage).toHaveAttribute('data-ready', 'true', { timeout: 45_000 });
     await expect(stage).toHaveAttribute('data-mode', 'webgl');
-    await expect(page.locator('.atlas__school')).toHaveText('Turner');
+    await expect(page.getByRole('button', { name: 'Turner' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
 
     const state = await page.evaluate(() => window.__atlas);
     expect(state?.school).toBe('turner');
-    expect(state?.schools).toContain('turner');
+    expect(state?.schools).toEqual(['hokusai', 'rothko', 'turner']);
+    expect(state?.stats).toMatchObject({ degraded: [] });
+    expect(problems).toEqual([]);
+  });
+
+  test('switches schools through the keyboard and the paper veil', async ({ page }) => {
+    const problems: string[] = [];
+    page.on('console', (message) => {
+      if (message.type() === 'error') problems.push(`console: ${message.text()}`);
+    });
+    page.on('pageerror', (error) => problems.push(`page: ${error.message}`));
+
+    await page.goto('/?offline=1&still=1&warmup=60&school=turner');
+    const stage = page.locator('.atlas');
+    await expect(stage).toHaveAttribute('data-ready', 'true', { timeout: 45_000 });
+
+    const selector = page.getByRole('group', { name: 'Painting school' });
+    const turner = selector.getByRole('button', { name: 'Turner' });
+    const rothko = selector.getByRole('button', { name: 'Rothko' });
+    const hokusai = selector.getByRole('button', { name: 'Hokusai' });
+
+    await expect(turner).toHaveAttribute('aria-pressed', 'true');
+    await expect(rothko).toHaveAttribute('aria-pressed', 'false');
+    await expect(hokusai).toHaveAttribute('aria-pressed', 'false');
+
+    await hokusai.focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(rothko).toBeFocused();
+    await page.keyboard.press('End');
+    await expect(turner).toBeFocused();
+
+    await rothko.click();
+    await expect(rothko).toHaveAttribute('aria-pressed', 'true');
+    await expect(turner).toHaveAttribute('aria-pressed', 'false');
+    await expect(page).toHaveURL(/school=rothko/);
+    await expect(page.locator('#atlas-description')).toContainText('Rothko');
+
+    // Still mode restarts its deterministic warm-up after the swap; a stats
+    // frame at or above the warm-up proves the new painting has landed.
+    await page.waitForFunction(
+      () => {
+        const frame = (window.__atlas?.stats as { frame?: number } | undefined)?.frame ?? 0;
+        return window.__atlas?.school === 'rothko' && frame >= 60;
+      },
+      null,
+      { timeout: 45_000 },
+    );
+
+    const state = await page.evaluate(() => window.__atlas);
+    expect(state?.school).toBe('rothko');
     expect(state?.stats).toMatchObject({ degraded: [] });
     expect(problems).toEqual([]);
   });

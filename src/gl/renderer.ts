@@ -229,6 +229,14 @@ export class AtlasRenderer {
     this.time = 0;
     this.ready = false;
     this.canvas.dataset.atlasReady = 'false';
+
+    // Still mode stops itself once the warm-up is painted. Swapping the scene
+    // has to start a fresh, equally deterministic warm-up, or the new school
+    // would appear as an empty canvas.
+    if (this.options.still && this.stopped) {
+      this.stopped = false;
+      this.startStill();
+    }
   }
 
   start(): void {
