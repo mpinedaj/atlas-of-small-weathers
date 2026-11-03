@@ -17,6 +17,11 @@ All notable changes to this project are documented here. The format follows
 - Hand-written WebGL2 painting engine: GPU brush particles, a ping-pong fluid field, four shader
   slots for schools, adaptive quality and deterministic still mode.
 - A 2D canvas painting and a poetic note when WebGL2 float targets are unavailable.
+- Automatic school discovery from `schools/*`, with metadata, palette, mapping and shader
+  validation that reports a malformed folder instead of painting it.
+- The Turner school: a luminous horizon, a rain veil, a heavy upper cloud mass and long scumbled
+  strokes, selectable with `?school=turner`.
+- `docs/schools.md`, the complete authoring contract for palette, mapping and shader schools.
 
 ## [0.0.0] - 2026-11-02
 

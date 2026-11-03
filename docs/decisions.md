@@ -129,3 +129,14 @@ deterministic clock as each other, while live mode follows real time (slowed, ne
 
 The pipeline needs WebGL2 plus `EXT_color_buffer_float`. When either is missing, the app does not
 show an error card: it hands the same scene to a 2D canvas painter (D10).
+
+## D15 — A school is a folder, not a registration
+
+**2026-11-02.** `import.meta.glob` discovers `schools/*` at build time, so adding a school never
+requires an import in core code. Metadata, palette, mapping and shader files are validated at
+discovery; a malformed folder is reported and excluded while the rest of the atlas boots. This is
+stricter than silently painting a half-defined school and looser than failing the page. Shader
+files are bodies inside `main()`, not complete programs, so every school shares one uniform and
+helper contract; if a single slot fails to compile, that slot degrades to the house shader and the
+renderer reports it. `?school=<id>` selects a school, and an unknown id falls back to Turner. The
+complete authoring contract lives in `docs/schools.md`.

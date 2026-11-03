@@ -6,8 +6,9 @@ import { DEFAULT_PLACE, loadWeather } from './data';
 import type { WeatherResult } from './data';
 import { CanvasPainter } from './gl/fallback';
 import { AtlasRenderer } from './gl/renderer';
-import { createHouseScene } from './gl/scene';
+import { createHouseScene, createScene } from './gl/scene';
 import type { PaintingScene } from './gl/scene';
+import { defaultSchool, findSchool, getSchools } from './schools/registry';
 
 /**
  * The opening screen, and the hand-off between weather and painting.
@@ -41,7 +42,12 @@ function observedTime(iso: string): string {
 }
 
 /** The same painting, told in words. */
-function describe(snapshot: WeatherSnapshot, seed: number, source: string): string {
+function describe(
+  snapshot: WeatherSnapshot,
+  seed: number,
+  source: string,
+  schoolName: string,
+): string {
   const wind = Math.round(snapshot.windSpeedKmh);
   const humidity = Math.round(snapshot.humidity);
   const pressure = Math.round(snapshot.pressureHpa);
@@ -58,7 +64,7 @@ function describe(snapshot: WeatherSnapshot, seed: number, source: string): stri
     `A generative painting of ${snapshot.city}${when}: ${snapshot.description.toLowerCase()},`,
     `${Math.round(snapshot.temperatureC)} degrees, ${humidity} percent humidity,`,
     `wind ${wind} kilometres per hour, ${pressure} hectopascals.`,
-    `Painted from seed ${seed}.`,
+    `Painted in the ${schoolName} manner from seed ${seed}.`,
     origin,
   ].join(' ');
 }
@@ -68,6 +74,7 @@ function stageMarkup(
   seed: number,
   note: string | null,
   source: string,
+  schoolName: string,
 ): string {
   const temperature = Math.round(snapshot.temperatureC);
   const place = snapshot.country ? `${snapshot.city}, ${snapshot.country}` : snapshot.city;
@@ -82,7 +89,10 @@ function stageMarkup(
           <h1 class="atlas__wordmark">Atlas of Small Weathers</h1>
           <p class="atlas__tagline">A quiet engine for painting the sky above one place.</p>
         </div>
-        <p class="atlas__seed"><span>seed</span> ${seed}</p>
+        <div class="atlas__meta">
+          <p class="atlas__school">${schoolName}</p>
+          <p class="atlas__seed"><span>seed</span> ${seed}</p>
+        </div>
       </header>
 
       <footer class="atlas__footer">
@@ -96,7 +106,7 @@ function stageMarkup(
         <p class="atlas__note" aria-live="polite">${note ?? `${snapshot.city} · ${observedTime(snapshot.observedAt)} local`}</p>
       </footer>
 
-      <p class="visually-hidden" id="atlas-description">${describe(snapshot, seed, source)}</p>
+      <p class="visually-hidden" id="atlas-description">${describe(snapshot, seed, source, schoolName)}</p>
     </main>
   `;
 }
@@ -111,6 +121,32 @@ const warmupFrames = Number(params.get('warmup') ?? 240);
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const offline = params.has('offline');
 
+/**
+ * Schools are discovered once, at boot. A bad folder is reported and skipped;
+ * it must never stop the atlas from opening. The URL can name a school, but an
+ * unknown name falls back to the opening school instead of an empty canvas.
+ */
+const discovery = getSchools();
+if (discovery.errors.length > 0) {
+  console.warn(
+    '[atlas] Some school folders could not be loaded:\n' +
+      discovery.errors
+        .map(
+          (error) => `  ${error.path}\n${error.issues.map((issue) => `    - ${issue}`).join('\n')}`,
+        )
+        .join('\n'),
+  );
+}
+
+const requestedSchool = params.get('school');
+const activeSchool =
+  findSchool(discovery.schools, requestedSchool) ?? defaultSchool(discovery.schools);
+const schoolName = activeSchool?.meta.name ?? 'House paper';
+
+if (requestedSchool && activeSchool?.meta.id !== requestedSchool) {
+  console.warn(`[atlas] Unknown school "${requestedSchool}"; opening ${schoolName}.`);
+}
+
 function setDebugState(
   stage: HTMLElement,
   scene: PaintingScene,
@@ -122,6 +158,7 @@ function setDebugState(
     mode,
     ready: stage.dataset.ready === 'true',
     school: scene.schoolId,
+    schools: discovery.schools.map((school) => school.meta.id),
     seed,
     city: snapshot.city,
     weather: snapshot.description,
@@ -145,8 +182,16 @@ if (app) {
     .then((result) => {
       if (detail) detail.textContent = statusLine(result, seed);
 
-      const scene = createHouseScene(result.snapshot, seed);
-      app.innerHTML = stageMarkup(result.snapshot, seed, result.note ?? null, result.source);
+      const scene = activeSchool
+        ? createScene(result.snapshot, seed, activeSchool)
+        : createHouseScene(result.snapshot, seed);
+      app.innerHTML = stageMarkup(
+        result.snapshot,
+        seed,
+        result.note ?? null,
+        result.source,
+        scene.schoolName,
+      );
       const stage = app.querySelector<HTMLElement>('.atlas');
       const initialCanvas = app.querySelector<HTMLCanvasElement>('.atlas__canvas');
       if (!stage || !initialCanvas) return;
