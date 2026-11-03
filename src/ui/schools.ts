@@ -63,7 +63,7 @@ export function createSchoolSelector(options: SchoolSelectorOptions): SchoolSele
     const current = ordered.indexOf(document.activeElement as HTMLButtonElement);
     if (current < 0) return;
 
-    let next = current;
+    let next: number;
     if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
       next = (current + 1) % ordered.length;
     } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
