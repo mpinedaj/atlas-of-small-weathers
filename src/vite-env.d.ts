@@ -5,6 +5,8 @@ interface AtlasDebugState {
   readonly mode: 'webgl' | 'fallback';
   readonly ready: boolean;
   readonly school: string;
+  /** Discovered school ids, in selector order. */
+  readonly schools: readonly string[];
   readonly seed: number;
   readonly city: string;
   readonly weather: string;

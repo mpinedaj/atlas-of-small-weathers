@@ -1,0 +1,12 @@
+{
+  "id": "turner",
+  "name": "Turner",
+  "author": "Atlas of Small Weathers",
+  "license": "MIT",
+  "description": "Weather as weather: luminous horizons, storm masses and long scumbled strokes, in the manner of J. M. W. Turner.",
+  "references": [
+    "J. M. W. Turner, Rain, Steam and Speed (1844)",
+    "J. M. W. Turner, Snow Storm: Steam-Boat off a Harbour's Mouth (1842)"
+  ],
+  "version": "0.1.0"
+}

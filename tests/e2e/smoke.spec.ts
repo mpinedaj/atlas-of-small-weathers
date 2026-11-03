@@ -76,4 +76,39 @@ test.describe('painting', () => {
     expect(signature!.buckets).toBeGreaterThan(3);
     expect(problems).toEqual([]);
   });
+
+  test('opens the Turner school from the URL', async ({ page }) => {
+    const problems: string[] = [];
+    page.on('console', (message) => {
+      if (message.type() === 'error') problems.push(`console: ${message.text()}`);
+    });
+    page.on('pageerror', (error) => problems.push(`page: ${error.message}`));
+
+    await page.goto('/?offline=1&still=1&warmup=90&school=turner');
+    const stage = page.locator('.atlas');
+    await expect(stage).toHaveAttribute('data-ready', 'true', { timeout: 45_000 });
+    await expect(stage).toHaveAttribute('data-mode', 'webgl');
+    await expect(page.locator('.atlas__school')).toHaveText('Turner');
+
+    const state = await page.evaluate(() => window.__atlas);
+    expect(state?.school).toBe('turner');
+    expect(state?.schools).toContain('turner');
+    expect(state?.stats).toMatchObject({ degraded: [] });
+    expect(problems).toEqual([]);
+  });
+
+  test('falls back to the opening school for an unknown id', async ({ page }) => {
+    const problems: string[] = [];
+    page.on('console', (message) => {
+      if (message.type() === 'error') problems.push(`console: ${message.text()}`);
+    });
+    page.on('pageerror', (error) => problems.push(`page: ${error.message}`));
+
+    await page.goto('/?offline=1&still=1&warmup=90&school=does-not-exist');
+    await expect(page.locator('.atlas')).toHaveAttribute('data-ready', 'true', { timeout: 45_000 });
+
+    const state = await page.evaluate(() => window.__atlas);
+    expect(state?.school).toBe('turner');
+    expect(problems).toEqual([]);
+  });
 });

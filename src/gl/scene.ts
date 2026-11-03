@@ -3,10 +3,11 @@ import type {
   GestureState,
   Palette,
   PaletteContext,
+  School,
   ShaderSet,
   WeatherSnapshot,
 } from '../core/types';
-import { toGestureState, toPaletteContext } from '../data';
+import { resolveMapping, toGestureState, toPaletteContext } from '../data';
 import { hexToRgb, mixRgb } from './color';
 import { DEFAULT_SHADERS } from './shaders/defaults';
 
@@ -118,8 +119,30 @@ export function housePalette(weather: WeatherSnapshot, context: PaletteContext):
 }
 
 /**
- * The opening scene. Named schools will replace the palette and shaders in the
- * next step; the renderer only ever sees a `PaintingScene`.
+ * Resolve a school into the data-only scene the renderer paints. Without a
+ * school this returns the house scene, which is also the graceful fallback.
+ */
+export function createScene(
+  weather: WeatherSnapshot,
+  seed: number,
+  school?: School,
+): PaintingScene {
+  if (!school) return createHouseScene(weather, seed);
+
+  return {
+    schoolId: school.meta.id,
+    schoolName: school.meta.name,
+    seed,
+    condition: weather.condition,
+    palette: school.palette(weather, toPaletteContext(weather, seed)),
+    gestures: toGestureState(weather, resolveMapping(school.mapping)),
+    shaders: { ...DEFAULT_SHADERS, ...school.shaders },
+  };
+}
+
+/**
+ * The opening scene. Named schools replace the palette and shaders; the
+ * renderer only ever sees a `PaintingScene`.
  */
 export function createHouseScene(weather: WeatherSnapshot, seed: number): PaintingScene {
   return {

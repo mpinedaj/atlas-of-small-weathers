@@ -75,8 +75,8 @@ draw and a final paper pass. Schools provide `school.json`, a palette function
 and any subset of four shaders (`field`, `flow`, `brush`, `post`). They may
 override individual gesture functions without replacing the whole mapping. The
 core discovers schools from `schools/*` with `import.meta.glob`, validates their
-metadata and refuses to boot a malformed one rather than painting something it
-cannot explain.
+metadata and leaves out a malformed one rather than painting something it cannot
+explain. The folder contract is documented in [`docs/schools.md`](schools.md).
 
 ### One frame
 
