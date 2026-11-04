@@ -8,6 +8,12 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Nothing yet.
+
+## [0.1.0] - 2026-11-03
+
+### Added
+
 - Typed Open-Meteo client for current weather and geocoding, with pure parsers and a calm offline
   sample.
 - Versioned memory and localStorage cache with per-endpoint lifetimes and stale fallbacks.
@@ -49,5 +55,6 @@ All notable changes to this project are documented here. The format follows
 - GitHub Actions for lint, typecheck, tests, build and end-to-end tests.
 - Issue and pull request templates, Dependabot, contributing guide and code of conduct.
 
-[Unreleased]: https://github.com/mpinedaj/atlas-of-small-weathers/compare/v0.0.0...HEAD
+[Unreleased]: https://github.com/mpinedaj/atlas-of-small-weathers/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/mpinedaj/atlas-of-small-weathers/compare/v0.0.0...v0.1.0
 [0.0.0]: https://github.com/mpinedaj/atlas-of-small-weathers/releases/tag/v0.0.0
