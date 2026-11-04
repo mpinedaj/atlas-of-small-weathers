@@ -1,6 +1,6 @@
 {
   "name": "atlas-of-small-weathers",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "description": "Turn live weather into slow, abstract paintings. A generative art atlas with pluggable painterly schools.",
