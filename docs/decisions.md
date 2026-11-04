@@ -210,3 +210,14 @@ fallback path gains `setScene` too, so a missing WebGL2 context still survives a
 
 **Cost:** `setScene` must restart still-mode warm-up and clear pigment without touching the
 context or the adaptive quality tier.
+
+## D22 — Data states blend over minutes
+
+**2026-11-04.** Weather readings change slowly, so the painting does not snap to a new
+reading. When `setScene` installs a new scene, the renderer keeps the previous one and
+interpolates palette, gestures and condition over 120 seconds. School changes still use the
+paper veil, because their shaders differ; weather changes within a school blend in place.
+
+**Cost:** `applyUniforms` carries a small amount of transition state and must clear it once
+the blend completes. Still-mode screenshots blend only slightly during warm-up, which is
+acceptable.
