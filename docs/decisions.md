@@ -154,3 +154,59 @@ a deliberate cut and short enough not to feel like waiting.
 **Cost:** the renderer now has a `setScene` path that must rebuild every GPU resource and restart
 still-mode warm-up without ever replacing the canvas. The crossfade is a real transition, so the
 end-to-end suite waits for the new scene's frame counter rather than for a click to return.
+
+## D17 — The URL is canonicalised on boot
+
+**2026-11-03.** `readUrlState` and `replaceUrlState` are the only readers and writers of the
+address bar. `mode=live|still` is the canonical parameter; the older `still=1` is kept as an
+alias for old links and screenshots, then dropped when the URL is rewritten. On boot the atlas
+rewrites the entry so that `city`, `lat`, `lon`, `school`, `seed` and `mode` are always present,
+and coordinates are written with four decimals. Old or incomplete links therefore resolve to a
+clear resting screen instead of silently painting Bogotá.
+
+**Cost:** every new persistent control must update both the parser and the writer, with tests.
+A link without coordinates for a non-curated place is honestly refused.
+
+## D18 — A missing reading is not another city
+
+**2026-11-03.** `loadWeather` falls back to the recorded Bogotá sample by default, which is right
+for the opening screen. For an explicit place change it is passed `fallbackToSample: false`, so a
+failed reading throws instead of painting a different sky. `applyPlace` keeps the previous painting
+and reports the failure in the search status; the initial boot path shows a resting screen. An
+aborted request is never treated as a failure, so a fast typist does not see the offline painting
+flash.
+
+**Cost:** the combobox must keep the old place selected after a failure, and the e2e suite seeds
+a cached reading for any non-default city it exercises.
+
+## D19 — Share URLs are clean
+
+**2026-11-03.** The copied link keeps only `city`, `lat`, `lon`, `school`, `seed` and `mode`; it
+strips `offline`, `warmup`, `still` and any debug switch, and clears the hash. The recipient gets
+the live painting rather than the fixture or a screenshot warm-up. The live address bar keeps test
+switches intact, because a developer's URL should not change under them.
+
+**Cost:** two URL writers (`replaceUrlState` for the live bar, `canonicalShareUrl` for the
+clipboard) must stay in agreement; both are unit-tested.
+
+## D20 — Idle fade is opacity, not removal
+
+**2026-11-03.** After a quiet moment the header and footer fade to opacity zero and lose pointer
+events, but they stay in the document and the accessibility tree. Under `prefers-reduced-motion`
+the fade is disabled entirely and the controls remain visible. The controller also keeps them
+visible while focus is inside the stage, while the search list is open, or while a scene change
+is in progress.
+
+**Cost:** the fade must be driven by a small controller (`src/ui/idle.ts`) rather than CSS
+alone, and e2e tests wake the page with a key before clicking. `visibility: hidden` was
+rejected because it removes the controls from the accessibility tree and breaks locators.
+
+## D21 — One canvas for every scene change
+
+**2026-11-03.** City, seed and school changes rebuild the painting scene through `setScene` on
+the existing renderer or 2D painter; the canvas element is never replaced. The same paper-veil
+crossfade is reused for all three, so the change of hand stays visually consistent. The 2D
+fallback path gains `setScene` too, so a missing WebGL2 context still survives a city change.
+
+**Cost:** `setScene` must restart still-mode warm-up and clear pigment without touching the
+context or the adaptive quality tier.

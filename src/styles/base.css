@@ -142,6 +142,19 @@ canvas {
   animation: text-arrive var(--dur-veil) var(--ease-out) 240ms both;
 }
 
+.boot__link {
+  display: inline-block;
+  padding: 0.5rem 0;
+  color: var(--ink-soft);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+}
+
+.boot__link:hover {
+  color: var(--ink);
+}
+
 @keyframes text-arrive {
   from {
     opacity: 0;

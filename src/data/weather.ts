@@ -2,7 +2,7 @@ import type { WeatherSnapshot } from '../core/types';
 import type { WeatherCache } from './cache';
 import { weatherCache } from './cache';
 import { OFFLINE_NOTE, offlineSnapshot } from './fixtures';
-import { fetchForecast } from './openMeteo';
+import { WeatherError, fetchForecast } from './openMeteo';
 import type { Place } from './places';
 
 /** Current conditions are fresh for ten minutes. */
@@ -22,6 +22,13 @@ export interface LoadWeatherOptions {
   readonly offline?: boolean;
   readonly signal?: AbortSignal;
   readonly cache?: WeatherCache;
+  /**
+   * Paint the recorded sample when neither the network nor the cache can
+   * answer. Defaults to true so the opening screen always has something to
+   * show. An explicit place change passes false, because turning a missing
+   * reading for Kyoto into a painting of Bogotá would be a lie.
+   */
+  readonly fallbackToSample?: boolean;
 }
 
 function slug(value: string): string {
@@ -42,6 +49,14 @@ function sample(): WeatherResult {
   return { snapshot: offlineSnapshot, source: 'offline', note: OFFLINE_NOTE };
 }
 
+function unavailable(place: Place, cause?: unknown): WeatherError {
+  return new WeatherError(
+    'unavailable',
+    `No weather is available for ${place.name}`,
+    cause === undefined ? undefined : { cause },
+  );
+}
+
 /**
  * Load the weather for a place.
  *
@@ -60,6 +75,7 @@ export async function loadWeather(
 
   if (options.offline) {
     if (hit) return { snapshot: hit.value, source: hit.fresh ? 'cache' : 'stale' };
+    if (options.fallbackToSample === false) throw unavailable(place);
     return sample();
   }
 
@@ -72,6 +88,9 @@ export async function loadWeather(
   } catch (error) {
     if (options.signal?.aborted) throw error;
     if (hit) return { snapshot: hit.value, source: 'stale' };
+    if (options.fallbackToSample === false) {
+      throw error instanceof WeatherError ? error : unavailable(place, error);
+    }
     return sample();
   }
 }

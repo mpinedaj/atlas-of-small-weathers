@@ -49,6 +49,9 @@ Everything that crosses a layer boundary is normalised:
 4. With nothing cached, the recorded Bogotá sample is painted and the interface
    says so in plain language.
 
+An explicit place change disables the sample fallback, so a missing reading is
+reported instead of painting Bogotá over the city that was asked for.
+
 An aborted request (the user typed another city) is never treated as a failure.
 It is simply discarded, so a fast typist never sees the offline painting flash.
 
@@ -129,9 +132,14 @@ Plain DOM, no framework. The URL is the source of truth (`city`, `lat`, `lon`,
 `school`, `seed`, `mode`), and every control writes back to it with
 `history.replaceState`. The school selector is a small button group with
 `aria-pressed`; a change is crossfaded through a paper veil rather than shown as
-a loading state, and the group stays focusable while it is busy. The canvas
-carries a textual description for screen readers, rewritten when the school
-changes. Debug controls (Tweakpane) are hidden behind a query parameter and are
+a loading state, and the group stays focusable while it is busy. The city search
+is an accessible combobox with a curated fallback and an honest failure state:
+a missing reading keeps the previous painting and says so in the search status.
+The seed stepper rebuilds the scene without replacing the canvas. The share
+action copies a clean canonical URL. The header and footer fade after a quiet
+moment and return on focus, an open panel, a scene change or reduced motion.
+The canvas carries a textual description for screen readers, rewritten on every
+change. Debug controls (Tweakpane) are hidden behind a query parameter and are
 never part of the published experience.
 
 ## Testing

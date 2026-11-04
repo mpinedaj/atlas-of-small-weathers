@@ -123,15 +123,6 @@
   text-wrap: pretty;
 }
 
-.atlas__seed {
-  flex: none;
-  padding-top: 0.2rem;
-  color: rgb(248 242 230 / 58%);
-  font-size: var(--text-caption);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.035em;
-}
-
 .atlas__meta {
   display: grid;
   flex: none;
@@ -231,12 +222,234 @@
   line-height: 1.2;
 }
 
-.atlas__seed span {
+.atlas__search-slot {
+  margin-top: 0.85rem;
+}
+
+/*
+ * The place search. It reads as a line drawn on the label until it is used;
+ * the results are the one place where a real panel appears, because a list of
+ * cities needs a surface that keeps them legible over any painting.
+ */
+.atlas__search {
+  position: relative;
+  width: min(21rem, 100%);
+  pointer-events: auto;
+}
+
+.atlas__search-input {
+  width: 100%;
+  padding: 0.45rem 0 0.4rem;
+  border: 0;
+  border-bottom: 1px solid rgb(248 242 230 / 28%);
+  border-radius: 0;
+  background: none;
+  color: var(--bone);
+  font-size: 1rem;
+  letter-spacing: 0.005em;
+  transition:
+    border-color var(--dur-quick) var(--ease-soft),
+    opacity var(--dur-quick) var(--ease-soft);
+  appearance: none;
+}
+
+.atlas__search-input::placeholder {
+  color: rgb(248 242 230 / 52%);
+  opacity: 1;
+}
+
+.atlas__search-input:hover {
+  border-bottom-color: rgb(248 242 230 / 48%);
+}
+
+.atlas__search-input:focus {
+  border-bottom-color: var(--bone);
+  outline: none;
+}
+
+.atlas__search-input:focus-visible {
+  outline: 2px solid var(--bone);
+  outline-offset: 3px;
+}
+
+.atlas__search-input::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+.atlas__search[data-busy='true'] .atlas__search-input {
+  cursor: progress;
+  opacity: 0.78;
+}
+
+.atlas__search-status {
+  min-height: 1.35em;
+  margin-top: 0.35rem;
+  color: rgb(248 242 230 / 64%);
+  font-size: var(--text-caption);
+  line-height: 1.35;
+  text-wrap: pretty;
+}
+
+.atlas__results {
+  position: absolute;
+  inset-inline-start: 0;
+  top: calc(100% + 0.35rem);
+  z-index: var(--z-panel);
+  width: min(24rem, calc(100vw - 2 * var(--gutter)));
+  max-height: min(18rem, 46vh);
+  margin: 0;
+  padding: 0.3rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+  border: 1px solid rgb(248 242 230 / 14%);
+  border-radius: var(--radius-panel);
+  background: rgb(20 18 15 / 94%);
+  box-shadow: 0 18px 50px rgb(8 7 6 / 24%);
+}
+
+.atlas__results[hidden] {
+  display: none;
+}
+
+.atlas__result {
+  display: grid;
+  gap: 0.05rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 1px;
+  cursor: pointer;
+  transition: background-color var(--dur-press) var(--ease-soft);
+}
+
+.atlas__result[data-active='true'] {
+  background: rgb(248 242 230 / 10%);
+}
+
+.atlas__result-name {
+  color: var(--bone);
+  font-size: 0.9375rem;
+  line-height: 1.3;
+}
+
+.atlas__result-meta {
+  color: rgb(248 242 230 / 58%);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+/* The seed stepper. Quiet typography, full-size targets. */
+.atlas__seed-control {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.15rem;
+  pointer-events: auto;
+  color: rgb(248 242 230 / 58%);
+  font-size: var(--text-caption);
+  font-variant-numeric: tabular-nums;
+}
+
+.atlas__seed-label {
   margin-right: 0.35em;
-  text-transform: uppercase;
   font-size: 0.68rem;
   letter-spacing: 0.13em;
+  text-transform: uppercase;
   opacity: 0.8;
+}
+
+.atlas__seed-step {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0 0.45rem;
+  color: rgb(248 242 230 / 58%);
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  line-height: 1;
+  transition:
+    color var(--dur-quick) var(--ease-soft),
+    opacity var(--dur-quick) var(--ease-soft);
+}
+
+.atlas__seed-step:hover {
+  color: var(--bone);
+}
+
+.atlas__seed-step:focus-visible {
+  border-radius: 50%;
+}
+
+.atlas__seed-value {
+  min-width: 3.5ch;
+  color: var(--bone);
+  font-family: var(--font-ui);
+  font-size: var(--text-caption);
+  letter-spacing: 0.035em;
+  text-align: center;
+}
+
+.atlas__seed-control[data-busy='true'] {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+.atlas__seed-control[data-busy='true'] .atlas__seed-step {
+  pointer-events: none;
+}
+
+.atlas__footer-meta {
+  display: grid;
+  flex: none;
+  gap: 0.35rem;
+  justify-items: end;
+  max-width: 34ch;
+  text-align: right;
+}
+
+.atlas__share {
+  min-height: 2.75rem;
+  padding: 0.6rem 0;
+  pointer-events: auto;
+  color: rgb(248 242 230 / 66%);
+  font-size: var(--text-caption);
+  letter-spacing: 0.04em;
+  transition:
+    color var(--dur-quick) var(--ease-soft),
+    opacity var(--dur-quick) var(--ease-soft);
+}
+
+.atlas__share:hover {
+  color: var(--bone);
+}
+
+.atlas__share[data-state='copied'] {
+  color: var(--bone);
+}
+
+.atlas__clipboard {
+  position: fixed;
+  inset-block-start: -1000px;
+  opacity: 0;
+}
+
+/*
+ * Idle. The label belongs to the painting, so it steps back after a few quiet
+ * seconds. Focus, an open search list, a scene change or reduced motion keeps
+ * it present; the controller decides, CSS only performs the fade.
+ */
+.atlas__header,
+.atlas__footer {
+  transition: opacity var(--dur-idle) var(--ease-soft);
+}
+
+.atlas[data-idle='true'] .atlas__header,
+.atlas[data-idle='true'] .atlas__footer {
+  opacity: 0;
+}
+
+/* Opacity alone would leave invisible controls clickable. */
+.atlas[data-idle='true'] .atlas__header *,
+.atlas[data-idle='true'] .atlas__footer * {
+  pointer-events: none;
 }
 
 .atlas__footer {
@@ -312,6 +525,16 @@
     text-align: left;
   }
 
+  .atlas__footer-meta {
+    justify-items: start;
+    max-width: 40ch;
+    text-align: left;
+  }
+
+  .atlas__seed-control {
+    justify-content: flex-start;
+  }
+
   .atlas__tagline {
     max-width: 22ch;
   }
@@ -346,5 +569,17 @@
 
   .atlas__veil {
     transition-duration: var(--dur-quick);
+  }
+
+  .atlas__header,
+  .atlas__footer {
+    transition-duration: var(--dur-quick);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .atlas__results {
+    background: var(--ink);
+    box-shadow: none;
   }
 }
