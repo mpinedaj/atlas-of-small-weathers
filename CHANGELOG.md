@@ -8,7 +8,8 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
-- Nothing yet.
+- Slow blending of palette, gestures and condition over two minutes when a new reading
+  arrives, instead of an instant swap.
 
 ## [0.1.0] - 2026-11-03
 

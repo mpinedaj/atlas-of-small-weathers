@@ -1,6 +1,6 @@
 import type { Condition } from '../core/types';
 import { FluidSimulation } from './fluid';
-import { hexToRgb } from './color';
+import { hexToRgb, mixRgb } from './color';
 import {
   Program,
   ShaderError,
@@ -94,6 +94,24 @@ const CONDITION_VALUE: Readonly<Record<Condition, number>> = {
 };
 
 const MIN_SCALE = 0.62;
+
+function toHex(rgb: readonly [number, number, number]): string {
+  const [r, g, b] = rgb;
+  return (
+    '#' +
+    [r, g, b]
+      .map((value) =>
+        Math.round(Math.max(0, Math.min(1, value)) * 255)
+          .toString(16)
+          .padStart(2, '0'),
+      )
+      .join('')
+  );
+}
+
+function mixNumber(a: number, b: number, t: number): number {
+  return a + (b - a) * Math.max(0, Math.min(1, t));
+}
 const MAX_WARMUP = 900;
 
 function defaultTier(): QualityTier {
@@ -114,6 +132,9 @@ export class AtlasRenderer {
   private readonly adaptiveQuality: boolean;
 
   private scene: PaintingScene;
+  private previousScene: PaintingScene | null = null;
+  private transitionStart = 0;
+  private readonly transitionDuration = 120;
   private programs: {
     field: Program;
     flow: Program;
@@ -214,6 +235,8 @@ export class AtlasRenderer {
   setScene(scene: PaintingScene): void {
     if (this.disposed) return;
     const gl = this.gl;
+    this.previousScene = this.scene;
+    this.transitionStart = this.time;
     this.disposePrograms();
     this.scene = scene;
     this.degraded = [];
@@ -427,13 +450,60 @@ export class AtlasRenderer {
   }
 
   private applyUniforms(program: Program, time: number, width: number, height: number): void {
-    const { palette, gestures, seed } = this.scene;
+    const scene = this.scene;
+    let palette = scene.palette;
+    let gestures = scene.gestures;
+    let conditionValue = CONDITION_VALUE[scene.condition];
+
+    if (this.previousScene) {
+      const elapsed = time - this.transitionStart;
+      const t = Math.min(1, Math.max(0, elapsed / this.transitionDuration));
+      if (t >= 1) {
+        this.previousScene = null;
+      } else {
+        const from = this.previousScene;
+        palette = {
+          ground: toHex(mixRgb(hexToRgb(from.palette.ground), hexToRgb(scene.palette.ground), t)),
+          ink: toHex(mixRgb(hexToRgb(from.palette.ink), hexToRgb(scene.palette.ink), t)),
+          accent: toHex(mixRgb(hexToRgb(from.palette.accent), hexToRgb(scene.palette.accent), t)),
+          highlight: toHex(
+            mixRgb(hexToRgb(from.palette.highlight), hexToRgb(scene.palette.highlight), t),
+          ),
+          shadow: toHex(mixRgb(hexToRgb(from.palette.shadow), hexToRgb(scene.palette.shadow), t)),
+          washes: scene.palette.washes.map((hex, index) =>
+            toHex(mixRgb(hexToRgb(from.palette.washes[index] ?? hex), hexToRgb(hex), t)),
+          ),
+        };
+        gestures = {
+          warmth: mixNumber(from.gestures.warmth, scene.gestures.warmth, t),
+          windSpeed: mixNumber(from.gestures.windSpeed, scene.gestures.windSpeed, t),
+          windDirection: mixNumber(from.gestures.windDirection, scene.gestures.windDirection, t),
+          windVector: [
+            mixNumber(from.gestures.windVector[0], scene.gestures.windVector[0], t),
+            mixNumber(from.gestures.windVector[1], scene.gestures.windVector[1], t),
+          ],
+          tension: mixNumber(from.gestures.tension, scene.gestures.tension, t),
+          humidityVeil: mixNumber(from.gestures.humidityVeil, scene.gestures.humidityVeil, t),
+          cloudMass: mixNumber(from.gestures.cloudMass, scene.gestures.cloudMass, t),
+          pressureWeight: mixNumber(from.gestures.pressureWeight, scene.gestures.pressureWeight, t),
+          rainGrain: mixNumber(from.gestures.rainGrain, scene.gestures.rainGrain, t),
+          light: mixNumber(from.gestures.light, scene.gestures.light, t),
+          strokeLength: mixNumber(from.gestures.strokeLength, scene.gestures.strokeLength, t),
+        };
+        conditionValue = mixNumber(
+          CONDITION_VALUE[from.condition],
+          CONDITION_VALUE[scene.condition],
+          t,
+        );
+      }
+    }
+
     const washCount = Math.max(1, palette.washes.length);
 
     program.float('uTime', time);
     program.vec2('uResolution', width, height);
-    program.float('uSeed', seed % 4096);
-    program.float('uCondition', CONDITION_VALUE[this.scene.condition]);
+    program.float('uSeed', scene.seed % 4096);
+    program.float('uCondition', conditionValue);
 
     program.color('uGround', hexToRgb(palette.ground));
     program.color('uInk', hexToRgb(palette.ink));
