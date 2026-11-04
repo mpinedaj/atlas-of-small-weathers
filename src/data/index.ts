@@ -14,7 +14,7 @@ export {
 export { WeatherCache, CACHE_NAMESPACE, createMemoryStorage, weatherCache } from './cache';
 export type { CacheHit, CacheOptions, CacheStorage } from './cache';
 export { GEOCODING_TTL_MS, normaliseQuery, offlinePlaces, searchPlaces } from './geocoding';
-export type { SearchOptions } from './geocoding';
+export type { PlaceSearchResult, PlaceSource, SearchOptions } from './geocoding';
 export { defaultMapping, resolveMapping, toGestureState, toPaletteContext } from './gestures';
 export { OFFLINE_NOTE, offlineSnapshot } from './fixtures';
 export { WeatherError, fetchForecast, fetchPlaces, forecastUrl, geocodingUrl } from './openMeteo';

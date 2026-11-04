@@ -29,7 +29,7 @@ const CURRENT_FIELDS = [
 
 const REQUEST_TIMEOUT_MS = 9_000;
 
-export type WeatherErrorCode = 'network' | 'timeout' | 'http' | 'parse' | 'empty';
+export type WeatherErrorCode = 'network' | 'timeout' | 'http' | 'parse' | 'empty' | 'unavailable';
 
 export class WeatherError extends Error {
   readonly code: WeatherErrorCode;

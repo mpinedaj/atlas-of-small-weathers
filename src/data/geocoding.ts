@@ -40,12 +40,27 @@ export interface SearchOptions {
 }
 
 /**
+ * Where a result set came from. The combobox says so in plain language: a
+ * curated list is honest about being curated, and a cached list is labelled as
+ * an earlier answer rather than passed off as live.
+ */
+export type PlaceSource = 'live' | 'cache' | 'offline';
+
+export interface PlaceSearchResult {
+  readonly places: readonly Place[];
+  readonly source: PlaceSource;
+}
+
+/**
  * Search for a place, preferring live results but never leaving the interface
  * empty when the network is down or the user asked for the offline sample.
  */
-export async function searchPlaces(query: string, options: SearchOptions = {}): Promise<Place[]> {
+export async function searchPlaces(
+  query: string,
+  options: SearchOptions = {},
+): Promise<PlaceSearchResult> {
   const trimmed = query.trim();
-  if (trimmed.length < 2) return [];
+  if (trimmed.length < 2) return { places: [], source: 'offline' };
 
   const normalised = normaliseQuery(trimmed);
   const cache = options.cache ?? weatherCache;
@@ -53,20 +68,21 @@ export async function searchPlaces(query: string, options: SearchOptions = {}): 
   const hit = cache.read<Place[]>(key);
 
   if (options.offline) {
-    return hit?.value ?? offlinePlaces(trimmed);
+    const places = hit?.value ?? offlinePlaces(trimmed);
+    return { places, source: hit ? 'cache' : 'offline' };
   }
-  if (hit?.fresh) return hit.value;
+  if (hit?.fresh) return { places: hit.value, source: 'cache' };
 
   try {
     const places = await fetchPlaces(trimmed, options.signal);
     if (places.length > 0) {
       cache.write(key, places, GEOCODING_TTL_MS);
-      return places.slice(0, MAX_RESULTS);
+      return { places: places.slice(0, MAX_RESULTS), source: 'live' };
     }
-    return offlinePlaces(trimmed);
+    return { places: offlinePlaces(trimmed), source: 'offline' };
   } catch (error) {
     if (options.signal?.aborted) throw error;
-    if (hit) return hit.value;
-    return offlinePlaces(trimmed);
+    if (hit) return { places: hit.value, source: 'cache' };
+    return { places: offlinePlaces(trimmed), source: 'offline' };
   }
 }

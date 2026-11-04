@@ -117,6 +117,47 @@ describe('loadWeather', () => {
     ).rejects.toThrow();
   });
 
+  it('refuses to paint Bogotá for an explicit place with no reading', async () => {
+    const { cache } = makeCache();
+    const kyoto = { name: 'Kyoto', latitude: 35.0116, longitude: 135.7681 };
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        throw new Error('offline');
+      }),
+    );
+
+    await expect(loadWeather(kyoto, { cache, fallbackToSample: false })).rejects.toMatchObject({
+      code: 'network',
+    });
+  });
+
+  it('refuses the sample for an explicit place in offline mode too', async () => {
+    const { cache } = makeCache();
+    const kyoto = { name: 'Kyoto', latitude: 35.0116, longitude: 135.7681 };
+
+    await expect(
+      loadWeather(kyoto, { cache, offline: true, fallbackToSample: false }),
+    ).rejects.toMatchObject({ code: 'unavailable' });
+  });
+
+  it('still serves a cached reading for an explicit place when the network is down', async () => {
+    const { cache, advance } = makeCache();
+    const kyoto = { name: 'Kyoto', latitude: 35.0116, longitude: 135.7681 };
+    cache.write(weatherCacheKey(kyoto), makeWeather({ city: 'Kyoto' }), 1000);
+    advance(5000);
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        throw new Error('offline');
+      }),
+    );
+
+    const result = await loadWeather(kyoto, { cache, fallbackToSample: false });
+    expect(result.source).toBe('stale');
+    expect(result.snapshot.city).toBe('Kyoto');
+  });
+
   it('keys the cache by rounded coordinates and place name', () => {
     const key = weatherCacheKey(DEFAULT_PLACE);
     expect(key).toBe('weather:4.610:-74.082:bogota');

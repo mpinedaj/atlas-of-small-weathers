@@ -31,7 +31,7 @@ function rgba(colour: Rgb, alpha: number): string {
 export class CanvasPainter {
   readonly canvas: HTMLCanvasElement;
   private readonly ctx: CanvasRenderingContext2D;
-  private readonly scene: PaintingScene;
+  private scene: PaintingScene;
   private readonly options: PainterOptions;
 
   private base: HTMLCanvasElement;
@@ -82,6 +82,30 @@ export class CanvasPainter {
   stop(): void {
     if (this.raf) cancelAnimationFrame(this.raf);
     this.raf = 0;
+  }
+
+  /**
+   * Install a new scene without replacing the canvas: school, seed and weather
+   * changes reuse the same 2D surface. Pigment is lifted, the palette is washed
+   * again, and still mode paints one deterministic frame before reporting ready.
+   */
+  setScene(scene: PaintingScene): void {
+    this.scene = scene;
+    this.grain = this.createGrain();
+    this.pigmentContext.clearRect(0, 0, this.width, this.height);
+    this.random = createRandom(scene.seed);
+    this.strokes = 0;
+    this.renderBase();
+
+    if (this.options.still) {
+      const frames = Math.max(60, Math.min(600, this.options.warmupFrames ?? 240));
+      this.addStrokes(frames * 4);
+      this.paint();
+      this.markReady();
+      return;
+    }
+
+    this.paint();
   }
 
   dispose(): void {

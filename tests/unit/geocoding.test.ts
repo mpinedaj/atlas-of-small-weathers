@@ -44,12 +44,13 @@ describe('offlinePlaces', () => {
 });
 
 describe('searchPlaces', () => {
-  it('returns curated matches without touching the network in offline mode', async () => {
+  it('returns curated matches and says they are offline', async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);
 
-    const places = await searchPlaces('lisbon', { offline: true, cache: makeCache() });
-    expect(places[0]?.country).toBe('Portugal');
+    const result = await searchPlaces('lisbon', { offline: true, cache: makeCache() });
+    expect(result.places[0]?.country).toBe('Portugal');
+    expect(result.source).toBe('offline');
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -59,15 +60,17 @@ describe('searchPlaces', () => {
     const cache = makeCache();
 
     const first = await searchPlaces('bogota', { cache });
-    expect(first).toHaveLength(2);
-    expect(first[0]?.name).toBe('Bogotá');
+    expect(first.places).toHaveLength(2);
+    expect(first.places[0]?.name).toBe('Bogotá');
+    expect(first.source).toBe('live');
 
     const second = await searchPlaces('bogota', { cache });
-    expect(second).toHaveLength(2);
+    expect(second.places).toHaveLength(2);
+    expect(second.source).toBe('cache');
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it('falls back to curated places when the geocoder is down', async () => {
+  it('falls back to curated places, labelled offline, when the geocoder is down', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn(async () => {
@@ -75,14 +78,18 @@ describe('searchPlaces', () => {
       }),
     );
 
-    const places = await searchPlaces('cape town', { cache: makeCache() });
-    expect(places[0]?.name).toBe('Cape Town');
+    const result = await searchPlaces('cape town', { cache: makeCache() });
+    expect(result.places[0]?.name).toBe('Cape Town');
+    expect(result.source).toBe('offline');
   });
 
-  it('returns nothing for a query that is too short', async () => {
+  it('returns no places for a query that is too short', async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);
-    expect(await searchPlaces('a', { cache: makeCache() })).toEqual([]);
+
+    const result = await searchPlaces('a', { cache: makeCache() });
+    expect(result.places).toEqual([]);
+    expect(result.source).toBe('offline');
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });

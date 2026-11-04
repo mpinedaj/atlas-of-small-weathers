@@ -29,6 +29,14 @@ All notable changes to this project are documented here. The format follows
   pressed state and a paper-veil crossfade that preserves keyboard focus while the scene changes.
 - `?school=` persistence when the school changes, so a shared URL restores the same hand.
 - `docs/schools.md`, the complete authoring contract for palette, mapping and shader schools.
+- City search combobox with curated offline fallback, keyboard navigation and an honest failure
+  state that keeps the previous painting.
+- Canonical URL state: `city`, `lat`, `lon`, `school`, `seed` and `mode` are read on boot and
+  written with `history.replaceState`; `still=1` remains a legacy alias.
+- Seed stepper that rebuilds the scene while keeping the canvas.
+- Share action that copies a clean canonical URL without test switches or the hash.
+- Idle fade for the header and footer, disabled under reduced motion and aware of focus and open
+  panels.
 
 ## [0.0.0] - 2026-11-02
 
