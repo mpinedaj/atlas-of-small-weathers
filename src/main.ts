@@ -220,6 +220,7 @@ if (app) {
   const seed = normaliseSeed(url.seed ?? DEFAULT_SEED);
   const mode = url.mode;
   const still = mode === 'still';
+  const frame = mode === 'frame';
   const warmupFrames = url.warmupFrames ?? 240;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -432,8 +433,16 @@ if (app) {
           }
         };
 
-        const applyPlace = async (place: Place): Promise<void> => {
-          if (samePlace(place, view.place) || busy()) {
+        const applyPlace = async (
+          place: Place,
+          options: { force?: boolean } = {},
+        ): Promise<void> => {
+          if (options.force) {
+            if (busy()) {
+              search?.setPlace(view.place);
+              return;
+            }
+          } else if (samePlace(place, view.place) || busy()) {
             search?.setPlace(view.place);
             return;
           }
@@ -537,6 +546,26 @@ if (app) {
           isBusy: () => busy() || search?.element.dataset.open === 'true',
           reducedMotion,
         });
+
+        if (frame) {
+          stage.classList.add('atlas--frame');
+          void document.documentElement.requestFullscreen?.().catch(() => undefined);
+          if ('wakeLock' in navigator) {
+            void (
+              navigator as Navigator & {
+                wakeLock?: { request: (type: string) => Promise<unknown> };
+              }
+            ).wakeLock
+              ?.request('screen')
+              .catch(() => undefined);
+          }
+          window.setInterval(
+            () => {
+              void applyPlace(view.place, { force: true });
+            },
+            10 * 60 * 1000,
+          );
+        }
 
         refreshUrl();
         publishDebug('fallback');

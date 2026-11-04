@@ -583,3 +583,14 @@
     box-shadow: none;
   }
 }
+
+/* Frame mode: the painting alone, no chrome. */
+.atlas--frame .atlas__header,
+.atlas--frame .atlas__footer,
+.atlas--frame .atlas__scrim {
+  display: none;
+}
+
+.atlas--frame {
+  cursor: none;
+}
