@@ -23,6 +23,7 @@ import { createPlaceSearch } from './ui/search';
 import type { PlaceSearch } from './ui/search';
 import { createSeedStepper } from './ui/seed';
 import type { SeedStepper } from './ui/seed';
+import { createExportButton } from './ui/export';
 import { createShareButton } from './ui/share';
 import { createSchoolSelector } from './ui/schools';
 import type { SchoolSelector } from './ui/schools';
@@ -593,6 +594,18 @@ if (app) {
           shareSlot.append(
             createShareButton({
               getState: () => shareState(view, mode),
+            }).element,
+          );
+          shareSlot.append(
+            createExportButton({
+              getCanvas: () => canvas,
+              getState: () => ({
+                city: view.result.snapshot.city,
+                latitude: view.place.latitude,
+                longitude: view.place.longitude,
+                seed: view.seed,
+                school: view.scene.schoolName,
+              }),
             }).element,
           );
         }
