@@ -8,6 +8,12 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Nothing yet.
+
+## [0.2.0] - 2026-11-04
+
+### Added
+
 - Slow blending of palette, gestures and condition over two minutes when a new reading
   arrives, instead of an instant swap.
 
@@ -56,6 +62,7 @@ All notable changes to this project are documented here. The format follows
 - GitHub Actions for lint, typecheck, tests, build and end-to-end tests.
 - Issue and pull request templates, Dependabot, contributing guide and code of conduct.
 
-[Unreleased]: https://github.com/mpinedaj/atlas-of-small-weathers/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/mpinedaj/atlas-of-small-weathers/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/mpinedaj/atlas-of-small-weathers/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/mpinedaj/atlas-of-small-weathers/compare/v0.0.0...v0.1.0
 [0.0.0]: https://github.com/mpinedaj/atlas-of-small-weathers/releases/tag/v0.0.0
