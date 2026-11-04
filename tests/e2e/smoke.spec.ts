@@ -29,6 +29,28 @@ test.describe('boot', () => {
   });
 });
 
+test.describe('reduced motion', () => {
+  test.use({ reducedMotion: 'reduce' });
+
+  test('still renders a finished painting', async ({ page }) => {
+    const problems: string[] = [];
+    page.on('console', (message) => {
+      if (message.type() === 'error') problems.push(`console: ${message.text()}`);
+    });
+    page.on('pageerror', (error) => problems.push(`page: ${error.message}`));
+
+    await page.goto('/?offline=1&still=1&warmup=120');
+    const stage = page.locator('.atlas');
+    await expect(stage).toHaveAttribute('data-ready', 'true', { timeout: 45_000 });
+    await expect(stage).toHaveAttribute('data-mode', 'webgl');
+
+    const state = await page.evaluate(() => window.__atlas);
+    expect(state?.mode).toBe('webgl');
+    expect(state?.seed).toBe(1844);
+    expect(problems).toEqual([]);
+  });
+});
+
 test.describe('painting', () => {
   test('renders a still frame in WebGL with visible variation and no console errors', async ({
     page,
