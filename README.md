@@ -1,5 +1,7 @@
 # Atlas of Small Weathers
 
+[![CI](https://github.com/mpinedaj/atlas-of-small-weathers/actions/workflows/ci.yml/badge.svg)](https://github.com/mpinedaj/atlas-of-small-weathers/actions/workflows/ci.yml)
+
 **Your sky, painted.** An open-source generative-art engine that turns live weather into slow,
 abstract paintings — one city, one seed, one small weather at a time.
 
