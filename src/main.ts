@@ -2,8 +2,15 @@ import './styles/index.css';
 
 import type { WeatherSnapshot } from './core/types';
 import { DEFAULT_SEED, normaliseSeed } from './core/seed';
-import type { Place, WeatherResult } from './data';
-import { CURATED_PLACES, DEFAULT_PLACE, loadWeather, normaliseQuery, samePlace } from './data';
+import type { AnnualDay, Place, WeatherResult } from './data';
+import {
+  CURATED_PLACES,
+  DEFAULT_PLACE,
+  fetchAnnual,
+  loadWeather,
+  normaliseQuery,
+  samePlace,
+} from './data';
 import { CanvasPainter } from './gl/fallback';
 import { AtlasRenderer } from './gl/renderer';
 import { createHouseScene, createScene } from './gl/scene';
@@ -258,6 +265,55 @@ if (app) {
       `The link names ${name}, but not its coordinates.`,
       'A shareable link always carries both. Ask for the painting again to get a complete one.',
     );
+  } else if (mode === 'ring') {
+    const end = new Date();
+    const start = new Date(end.getTime() - 365 * 24 * 60 * 60 * 1000);
+    const format = (value: Date): string => value.toISOString().slice(0, 10);
+    app.innerHTML = `
+      <main class="boot" aria-busy="true">
+        ${mark}
+        <h1 class="boot__title">Atlas of Small Weathers</h1>
+        <p class="boot__line">A quiet engine for painting the sky above one place.</p>
+        <p class="boot__detail" aria-live="polite">Gathering a year of small weathers…</p>
+      </main>
+    `;
+
+    void fetchAnnual(initialPlace, format(start), format(end))
+      .then((days: AnnualDay[]) => {
+        app.innerHTML = `
+          <main class="atlas atlas--ring">
+            <canvas class="atlas__ring-canvas" width="900" height="900" aria-label="Annual ring for ${escapeHtml(
+              initialPlace.name,
+            )}"></canvas>
+          </main>
+        `;
+        const canvas = app.querySelector<HTMLCanvasElement>('.atlas__ring-canvas');
+        if (!canvas) return;
+        const context = canvas.getContext('2d');
+        if (!context) return;
+        const centre = canvas.width / 2;
+        const radius = centre - 40;
+        context.fillStyle = '#efe7d9';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        const count = days.length || 365;
+        days.forEach((day: AnnualDay, index: number) => {
+          const angle = (index / count) * Math.PI * 2 - Math.PI / 2;
+          const nextAngle = ((index + 1) / count) * Math.PI * 2 - Math.PI / 2;
+          const warmth = (day.temperatureC + 10) / 40;
+          const hue = 30 - warmth * 40;
+          context.beginPath();
+          context.arc(centre, centre, radius, angle, nextAngle);
+          context.lineWidth = 6;
+          context.strokeStyle = `hsl(${hue} 45% ${35 + warmth * 25}%)`;
+          context.stroke();
+        });
+      })
+      .catch(() => {
+        app.innerHTML = restMarkup(
+          `No annual reading for ${initialPlace.name} just now.`,
+          'The paper is ready; the year is not.',
+        );
+      });
   } else {
     app.innerHTML = `
       <main class="boot" aria-busy="true">

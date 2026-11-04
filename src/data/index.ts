@@ -17,8 +17,15 @@ export { GEOCODING_TTL_MS, normaliseQuery, offlinePlaces, searchPlaces } from '.
 export type { PlaceSearchResult, PlaceSource, SearchOptions } from './geocoding';
 export { defaultMapping, resolveMapping, toGestureState, toPaletteContext } from './gestures';
 export { OFFLINE_NOTE, offlineSnapshot } from './fixtures';
-export { WeatherError, fetchForecast, fetchPlaces, forecastUrl, geocodingUrl } from './openMeteo';
-export type { WeatherErrorCode } from './openMeteo';
+export {
+  WeatherError,
+  fetchAnnual,
+  fetchForecast,
+  fetchPlaces,
+  forecastUrl,
+  geocodingUrl,
+} from './openMeteo';
+export type { AnnualDay, WeatherErrorCode } from './openMeteo';
 export { CURATED_PLACES, DEFAULT_PLACE, placeLabel, samePlace } from './places';
 export type { Place } from './places';
 export { WEATHER_TTL_MS, loadWeather, weatherCacheKey } from './weather';

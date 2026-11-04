@@ -13,6 +13,7 @@ import { describeWeatherCode } from './wmo';
 
 const FORECAST_ENDPOINT = 'https://api.open-meteo.com/v1/forecast';
 const GEOCODING_ENDPOINT = 'https://geocoding-api.open-meteo.com/v1/search';
+const ARCHIVE_ENDPOINT = 'https://archive-api.open-meteo.com/v1/archive';
 
 const CURRENT_FIELDS = [
   'temperature_2m',
@@ -57,6 +58,17 @@ export function geocodingUrl(query: string, count = 8): string {
   url.searchParams.set('count', String(count));
   url.searchParams.set('language', 'en');
   url.searchParams.set('format', 'json');
+  return url.toString();
+}
+
+export function archiveUrl(place: Place, start: string, end: string): string {
+  const url = new URL(ARCHIVE_ENDPOINT);
+  url.searchParams.set('latitude', place.latitude.toFixed(4));
+  url.searchParams.set('longitude', place.longitude.toFixed(4));
+  url.searchParams.set('start_date', start);
+  url.searchParams.set('end_date', end);
+  url.searchParams.set('daily', 'temperature_2m_mean');
+  url.searchParams.set('timezone', 'auto');
   return url.toString();
 }
 
@@ -204,6 +216,39 @@ export async function fetchPlaces(query: string, signal?: AbortSignal): Promise<
   if (trimmed.length < 2) return [];
   const payload = await requestJson(geocodingUrl(trimmed), signal);
   return parseGeocoding(payload);
+}
+
+export interface AnnualDay {
+  readonly date: string;
+  readonly temperatureC: number;
+}
+
+export function parseAnnual(payload: unknown): AnnualDay[] {
+  const root = asRecord(payload);
+  const daily = root ? asRecord(root['daily']) : null;
+  if (!root || !daily) return [];
+  const times = daily['time'];
+  const temps = daily['temperature_2m_mean'];
+  if (!Array.isArray(times) || !Array.isArray(temps)) return [];
+  const days: AnnualDay[] = [];
+  for (let i = 0; i < times.length; i += 1) {
+    const date = times[i];
+    const temp = temps[i];
+    if (typeof date !== 'string') continue;
+    if (typeof temp !== 'number' || !Number.isFinite(temp)) continue;
+    days.push({ date, temperatureC: temp });
+  }
+  return days;
+}
+
+export async function fetchAnnual(
+  place: Place,
+  start: string,
+  end: string,
+  signal?: AbortSignal,
+): Promise<AnnualDay[]> {
+  const payload = await requestJson(archiveUrl(place, start, end), signal);
+  return parseAnnual(payload);
 }
 
 function clamp(value: number, min: number, max: number): number {

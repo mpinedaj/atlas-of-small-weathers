@@ -7,7 +7,7 @@
  * stepping through every school or seed the visitor tried.
  */
 
-export type AtlasMode = 'live' | 'still' | 'frame';
+export type AtlasMode = 'live' | 'still' | 'frame' | 'ring';
 
 export interface PlaceState {
   readonly name: string;
@@ -58,7 +58,13 @@ export function readUrlState(search: string): UrlState {
   const seed = seedRaw === '' ? null : Number(seedRaw);
   const rawMode = params.get('mode');
   const mode: AtlasMode =
-    rawMode === 'frame' ? 'frame' : rawMode === 'still' || params.has('still') ? 'still' : 'live';
+    rawMode === 'ring'
+      ? 'ring'
+      : rawMode === 'frame'
+        ? 'frame'
+        : rawMode === 'still' || params.has('still')
+          ? 'still'
+          : 'live';
 
   return {
     city: city === '' ? null : city,
